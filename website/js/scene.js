@@ -24,8 +24,6 @@ class TexturedObj {
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
             gl.generateMipmap(gl.TEXTURE_2D);
         });
-
-        
     }
 }
 
@@ -45,7 +43,7 @@ class Scene {
         this.robots = {};
 
         this.robot_src = ["robots/robot1.png","robots/robot2.png","robots/robot3.png","robots/robot4.png"]
-        this.goal_src ="robots/goal1.png";
+        this.goal_src ="robots/goal2.png";
 
 
         var size = 0.9;

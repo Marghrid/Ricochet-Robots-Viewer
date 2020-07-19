@@ -12,7 +12,7 @@ function setup(){
     canvas = document.getElementById("c");
     canvas.width = "600";
     canvas.height = "400";
-    gl = canvas.getContext("webgl2");
+    gl = canvas.getContext("webgl2",);
     if(!gl){
         error("No WEBGL");
     }
@@ -29,7 +29,7 @@ function doUIstuff(){
 function animate(){
     doUIstuff();
     renderer.render(scene);
-    //requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 }
 
 

@@ -103,6 +103,8 @@ class Renderer{
         gl.bindVertexArray(this.vaos.board);
         gl.activeTexture(gl.TEXTURE0);
 
+       
+
 
         for(let robot in scene.robots){
             
@@ -294,14 +296,19 @@ class Renderer{
         out vec4 frag_color;
         uniform sampler2D image;
         uniform vec3 color;
+        const int SAMPLES = 4;
         void main() {
           // gl_FragColor is a special variable a fragment shader
           // is responsible for setting
         
-
+          float alpha = texture(image,vec2(uv.x,1.0-uv.y)).r;
+    
                  
-          //frag_color = vec4(color,texture(image,uv).r);
-          frag_color = vec4(texture(image,uv));
+          frag_color = vec4(color*alpha,alpha);
+          if(alpha<0.05){
+              discard;
+          }
+          //frag_color = vec4(texture(image,uv));
         
         }
         `;
