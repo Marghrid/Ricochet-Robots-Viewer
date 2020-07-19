@@ -34,7 +34,21 @@
 	<h1>Ricochet Robots instance viewer</h1>
 	<canvas id="c"></canvas>
 
-	<h4> File upload: </h4>
+	<h4>Choose an example instance:</h4>
+      <div id="example_buttons_div">
+        <button type="button" class="example_button" onclick="example1_button()"> Grid 5x5 </button>
+        <!-- <button type="button" class="example_button" onclick="example2_button()"> Grid 4x4, 8 agents </button> -->
+        <!-- <button type="button" class="example_button" onclick="example3_button()"> Grid 8x8, 16 agents </button> -->
+        <!-- <button type="button" class="example_button" onclick="example7_button()"> Grid 8x8, 24 agents </button> -->
+        <!-- <button type="button" class="example_button" onclick="example4_button()"> Subway 1 </button> -->
+        <!-- <button type="button" class="example_button" onclick="example5_button()"> Subway 2 </button> -->
+        <!-- <button type="button" class="example_button" onclick="example6_button()"> Bridges 1 </button> -->
+        <!-- <button type="button" class="example_button" onclick="example8_button()"> Platforms 1 </button> -->
+        <!-- <button type="button" class="example_button" onclick="example10_button()"> Platforms 2 </button> -->
+        <!-- <button type="button" class="example_button" onclick="example11_button()"> Platforms 3 </button> -->
+      </div>
+
+	<h4> Or upload a new file: </h4>
 	<div id="file_load_div">
 		<p> Instance file: <input type="file" id="rr_file"> </p>
 		<p> Solution file: <input type="file" id="sol_file"> </p>
