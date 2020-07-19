@@ -43,22 +43,26 @@ function parse_rr(rr_string) {
     barriers_down = []
     for (let i = 7; i < 7+k; ++i) {
     	let line = lines[i].split(" ")
-    	let dir = line[2]
+    	let dir = line[2].trim()
         let row = parseInt(line[0])
         let col = parseInt(line[1])
+        console.log('"' + dir+ '"')
+        console.log(dir.length)
+        console.log(directions)
+        console.log(directions.indexOf(dir))
         console.assert(directions.indexOf(dir) >= 0, dir + " not in " + directions)
         console.assert(1 <= row <= board_size)
         console.assert(1 <= col <= board_size)
-    	if (dir === "l") {
+    	if (dir === 'l') {
     		barriers_right.push([row, col-1])
     	}
-    	else if (dir === "r") {
+    	else if (dir === 'r') {
     		barriers_right.push([row, col])
     	}
-    	else if (dir === "u") {
+    	else if (dir === 'u') {
     		barriers_down.push([row-1, col])
     	}
-    	else if (dir === "d") {
+    	else if (dir === 'd') {
     		barriers_down.push([row, col])
     	}
     }
