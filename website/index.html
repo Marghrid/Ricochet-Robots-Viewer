@@ -1,21 +1,49 @@
 <!DOCTYPE HTML5>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Ricochet Robots</title>
+	<meta charset="UTF-8">
+	<title>Ricochet Robots</title>
+	<link rel="stylesheet" href="font-awesome/css/all.css">
+	<link rel="stylesheet" type="text/css" href="style.css" />
+
+	<script src="js/init.js"></script> 
 </head>
 
 <body>
-<canvas id="c"></canvas>
+	<canvas id="c"></canvas>
+
+	<h4> File upload: </h4>
+	<div id="file_load_div">
+		<p> Instance file: <input type="file" id="rr_file"> </p>
+		<p> Solution file: <input type="file" id="sol_file"> </p>
+		<button type="button" id="refresh_button" onclick="refresh_button()"> Refresh </button></p>
+	</div>
+
+	<footer>
+		<div>
+			<p>Margarida Ferreira</p>
+			<p><a href="https://github.com/marghrid" class="fab fa-github"></a></p>
+		</div>
+		<div>
+			<p>Duarte David</p>
+			<p><a href="https://github.com/drcd1" class="fab fa-github"></a></p>
+		</div>
+		<div>
+			<p>2020</p>
+		</div>
+	</footer>
+
+	<script src="js/Board.js"></script> 
 
 
-<script src="js/renderer.js"></script> 
 
-<script src="js/input.js"></script> 
-<script src="js/util.js"></script> 
-<script src="js/scene.js"></script> 
+	<!-- <script src="js/renderer.js"></script> 
 
-<script src="js/main.js"></script>
+	<script src="js/input.js"></script> 
+	<script src="js/util.js"></script> 
+	<script src="js/scene.js"></script> 
+
+	<script src="js/main.js"></script> -->
 
 </body>
 
