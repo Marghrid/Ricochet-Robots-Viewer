@@ -12,6 +12,14 @@ function example1_button() {
     get_example_file("i1");
 }
 
+function example2_button() {
+    get_example_file("i2");
+}
+
+function example3_button() {
+    get_example_file("i3");
+}
+
 function show(rr_board) {
 	console.log(rr_board.size);
 	console.log(rr_board.robots);
