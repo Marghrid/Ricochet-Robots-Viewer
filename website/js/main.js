@@ -10,15 +10,14 @@ function error(str){
 
 function setup(){
     canvas = document.getElementById("c");
-    gl = canvas.getContext("webgl");
+    canvas.width = "400";
+    canvas.height = "400";
+    gl = canvas.getContext("webgl2");
     if(!gl){
         error("No WEBGL");
     }
 
-
-    bgColor = createColor(0,0,255);
-
-    renderer = new Renderer(bgColor);
+    renderer = new Renderer();
     scene = new Scene();
 }
 
@@ -30,7 +29,7 @@ function doUIstuff(){
 function animate(){
     doUIstuff();
     renderer.render(scene);
-    requestAnimationFrame(step);
+    //requestAnimationFrame(animate);
 }
 
 
