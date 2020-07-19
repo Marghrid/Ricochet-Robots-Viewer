@@ -58,7 +58,7 @@ function animate(){
     if(time>-1)
         time += delta;
     doUIstuff();
-    if(time>6){
+    /*if(time>6){
         
         let right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
         let bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];
@@ -74,7 +74,7 @@ function animate(){
         
         time=-10;
         scene.change_board(size,right_walls,bottom_walls,positions,goal,goal_color)
-    }
+    }*/
     renderer.render(scene);
     requestAnimationFrame(animate);
 }
