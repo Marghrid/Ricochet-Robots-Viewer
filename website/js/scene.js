@@ -29,10 +29,10 @@ class TexturedObj {
 
 
 class Scene {
-    constructor(){
+    constructor(board_size,right_walls,bottom_walls,positions, goal,goal_color){
         this.bgColor=createColor(240,240,240);
         this.board_color = createColor(240,240,240);
-        this.grid_color  = createColor(150,150,150);
+        this.grid_color  = createColor(180,180,180);
         this.wall_color  = createColor(30,30,30);
         this.grid_width = 0.02;
         
@@ -41,63 +41,92 @@ class Scene {
         this.blue       = createColor(  0,127,212);
         this.red        = createColor(240, 31, 87);        
         this.robots = {};
+        
 
         this.robot_src = ["robots/robot1.png","robots/robot2.png","robots/robot3.png","robots/robot4.png"]
         this.goal_src ="robots/goal2.png";
 
 
         var size = 0.9;
-        this.robots.yellow = new TexturedObj(0.5,0.5,size,this.yellow,this.robot_src[0]);
-        this.robots.green  = new TexturedObj(0.5,2.5,size,this.green,this.robot_src[1]);
-        this.robots.blue   = new TexturedObj(2.5,0.5,size,this.blue,this.robot_src[2]);
-        this.robots.red    = new TexturedObj(2.5,2.5,size,this.red,this.robot_src[3]);
+        this.robots.yellow = new TexturedObj(positions.yellow[0],positions.yellow[1],size,this.yellow,this.robot_src[0]);
+        this.robots.green = new TexturedObj(positions.green[0],positions.green[1],size,this.green,this.robot_src[1]);
+        this.robots.blue = new TexturedObj(positions.blue[0],positions.blue[1],size,this.blue,this.robot_src[2]);
+        this.robots.red = new TexturedObj(positions.red[0],positions.red[1],size,this.red,this.robot_src[3]);
         this.goal = new TexturedObj(1.5,1.5,size,this.yellow, this.goal_src);
-        this.board_size = 5;
-        var right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
-        var bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];
+        
 
+        
 
-        this.center = [this.board_size/2,this.board_size/2];
-        this.v_zoom = 2/(this.board_size+6*this.grid_width);
-
-        this._createTexture(this.board_size);
-        this._updateTexture(right_walls,bottom_walls,[],[]);    
+        this._createTexture();
+        this.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color); 
 
     }
 
-    _createTexture(size){
+    change_board(board_size, right_walls, bottom_walls,positions,goal,goal_color){
+        this.board_size = board_size;
+        this.center = [this.board_size/2,this.board_size/2];
+        this.v_zoom = 2/(this.board_size+6*this.grid_width);
+        this.robots.yellow.x = positions.yellow[0];
+        this.robots.yellow.y = positions.yellow[1];
+        
+        this.robots.green.x = positions.green[0];
+        this.robots.green.y = positions.green[1];
+
+
+        this.robots.blue.x = positions.blue[0];
+        this.robots.blue.y = positions.blue[1];
+
+        
+        this.robots.red.x = positions.red[0];
+        this.robots.red.y = positions.red[1];
+
+        this.goal.x = goal[0];
+        this.goal.y = goal[1];
+
+        switch(goal_color){
+            case "red":
+                this.goal.color = this.red;
+                break;
+            case "blue":
+                this.goal.color = this.blue;
+                break;
+            case "yellow":
+                this.goal.color = this.yellow;
+                break;
+            case "green":
+            default:
+                this.goal.color = this.green;
+                break;
+        }
+        this._change_data_size(board_size);
+        this._updateTexture(right_walls,bottom_walls,[],[]);
+    }
+
+    _createTexture(){
         this.texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);
         this.texture_data = {}
         this.texture_data.level = 0;
         this.texture_data.internalFormat = gl.RGB;
-        this.texture_data.width = size;
-        this.texture_data.height = size;
-        console.log(this.texture_data.width,this.texture_data.height)
         this.texture_data.border = 0;
         this.texture_data.format = gl.RGB;
-        this.texture_data.type = gl.UNSIGNED_BYTE;
-        
+        this.texture_data.type = gl.UNSIGNED_BYTE;           
+    }
+    _change_data_size(size){
+        this.texture_data.width = size;
+        this.texture_data.height = size;
 
-        //TODO: docs say this is init to zero
-        // IS IT TRUE?
-    
         this.texture_data.data = new Uint8Array(3*this.texture_data.width*this.texture_data.height);
         
         for(let i in this.texture_data.data){
-            //if(i%3==1){
-                this.texture_data.data[i] = 0;
-            
-            //} else {
-             //   this.texture_data.data[i] = 255;
-            //}
+            this.texture_data.data[i] = 0;
         }
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
         gl.texImage2D(gl.TEXTURE_2D, this.texture_data.level, this.texture_data.internalFormat, 
-                                    this.texture_data.width, this.texture_data.height, 
-                                    this.texture_data.border, this.texture_data.format, 
-                                    this.texture_data.type, this.texture_data.data);
-         
+                                this.texture_data.width, this.texture_data.height, 
+                                this.texture_data.border, this.texture_data.format, 
+                                this.texture_data.type, this.texture_data.data);
+     
         // set the filtering so we don't need mips and it's not filtered
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);

@@ -17,7 +17,7 @@ function parse_rr(rr_string) {
 	let lines = rr_string.split('\n');
 	let board_size = parseInt(lines[0]);
 	let init_positions = {};
-	for (let i = 1; i <= 5; ++i) {
+	for (let i = 1; i <= 4; ++i) {
 		let line = lines[i].split(" ");
         let row = parseInt(line[1])
         let col = parseInt(line[2])

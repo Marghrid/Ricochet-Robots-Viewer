@@ -6,7 +6,6 @@ var quad = [-1.0,-1.0,
      1.0,-1.0,
      1.0,1.0];
 
-
 function createShader(gl,type,source){
     var shader = gl.createShader(type);
     gl.shaderSource(shader,source);
@@ -34,6 +33,10 @@ function createProgram(gl,vertexShader,fragmentShader){
     console.log(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
 } 
+
+
+
+
 
 
 class Renderer{
@@ -194,7 +197,7 @@ class Renderer{
         void main() {
           // gl_FragColor is a special variable a fragment shader
           // is responsible for setting
-        
+          float x_thick = grid_w*0.5;
 
           if(pos.x>0.0 && pos.y > 0.0f)
             frag_color = vec4(board_color, 1.0); // return reddish-purple
@@ -203,19 +206,19 @@ class Renderer{
           if(fract(pos.x)>=(1. - grid_w) || fract(pos.y)>=(1.-grid_w) || fract(pos.x) <=grid_w || fract(pos.y) <=grid_w ){
             frag_color = vec4(grid_color,1.0);
           }
-          if(pos.x<grid_w || pos.y<grid_w || pos.x>=bs - grid_w || pos.y>=bs - grid_w){
+          if(pos.x<grid_w+x_thick || pos.y<grid_w+x_thick || pos.x>=bs - grid_w -x_thick || pos.y>= bs - grid_w-x_thick){
               frag_color =vec4(wall_color,1.0);
           }
 
-          vec2 help = pos-vec2(grid_w,-grid_w);
+          vec2 help = pos-vec2(grid_w+x_thick,-grid_w-x_thick);
           ivec2 tile = ivec2(floor(help)) + ivec2(0,0);
           vec2 xy = texelFetch(wallTexture,tile,0).rg;
-          if(fract(help).x >=(1.0-2.0*grid_w) && fract(help).y>2.0*grid_w){
+          if(fract(help).x >=(1.0-2.0*(grid_w+x_thick)) && fract(help).y>2.0*grid_w){
             if(xy.x>0.5)
                 frag_color =vec4(wall_color,1.0);
           }
 
-          if(fract(help).y <=(2.0*grid_w)  && fract(help).x<1.0-2.0*grid_w){
+          if(fract(help).y <=(2.0*(grid_w+x_thick))  && fract(help).x<1.0-2.0*grid_w){
             if(xy.y>0.5)
                 frag_color =vec4(wall_color,1.0);
           }
@@ -302,9 +305,13 @@ class Renderer{
           // is responsible for setting
         
           float alpha = texture(image,vec2(uv.x,1.0-uv.y)).r;
-    
+          
+          vec2 p = (uv-0.5)*2.0;
+          float f = -dot(p,p)*80./255. + 20./255.;
+          //frag_color = vec4(f,f,f,1.0f);
+          //return;
                  
-          frag_color = vec4(color*alpha,alpha);
+          frag_color = vec4((color+f)*alpha,alpha);
           if(alpha<0.05){
               discard;
           }
