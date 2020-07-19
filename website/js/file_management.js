@@ -17,30 +17,42 @@ function parse_rr(rr_string) {
 	let init_positions = {};
 	for (let i = 1; i <= 5; ++i) {
 		let line = lines[i].split(" ");
-		init_positions[line[0]] = [parseInt(line[1]), parseInt(line[2])];
+        let row = parseInt(line[1])
+        let col = parseInt(line[2])
+        console.assert(1 <= row <= board_size)
+        console.assert(1 <= col <= board_size)
+		init_positions[line[0]] = [row, col];
 	}
 
 	let line_5 = lines[5].split(" ");
+    let row = parseInt(line_5[1])
+    let col = parseInt(line_5[2])
+    console.assert(1 <= row <= board_size)
+    console.assert(1 <= col <= board_size)
     goal_position = line_5;
 
     k = parseInt(lines[6])
 
     barriers_right = []
     barriers_down = []
-    for (let i = 7; i <= 7+k; ++i) {
+    for (let i = 7; i < 7+k; ++i) {
     	let line = lines[i].split(" ")
     	dir = line[2]
+        let row = parseInt(line[0])
+        let col = parseInt(line[1])
+        console.assert(1 <= row <= board_size)
+        console.assert(1 <= col <= board_size)
     	if (dir === "l") {
-    		barriers_right.push([parseInt(line[0]), parseInt(line[1])-1])
+    		barriers_right.push([row, col-1])
     	}
     	else if (dir === "r") {
-    		barriers_right.push([parseInt(line[0]), parseInt(line[1])])
+    		barriers_right.push([row, col])
     	}
     	else if (dir === "u") {
-    		barriers_down.push([parseInt(line[0])-1, parseInt(line[1])])
+    		barriers_down.push([row-1, col])
     	}
     	else if (dir === "d") {
-    		barriers_down.push([parseInt(line[0]), parseInt(line[1])])
+    		barriers_down.push([row, col])
     	}
     }
     
