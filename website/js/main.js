@@ -10,7 +10,7 @@ function error(str){
 
 function setup(){
     canvas = document.getElementById("c");
-    canvas.width = "400";
+    canvas.width = "600";
     canvas.height = "400";
     gl = canvas.getContext("webgl2");
     if(!gl){

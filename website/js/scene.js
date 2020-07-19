@@ -1,9 +1,31 @@
-class Robot {
-    constructor(x,y,size,color){
+class TexturedObj {
+    constructor(x,y,size,color, texture_src){
         this.x = x;
         this.y = y;
         this.size = size;
         this.color = color;
+
+
+        this.texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+ 
+        var texture = this.texture;
+        // Fill the texture with a 1x1 blue pixel.
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+              new Uint8Array([255, 0, 255, 255]));
+ 
+        // Asynchronously load an image
+        var image = new Image();
+        image.src = texture_src;
+        image.addEventListener('load', function() {
+            //Now that the image has loaded make copy it to the texture.
+            
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, image);
+            gl.generateMipmap(gl.TEXTURE_2D);
+        });
+
+        
     }
 }
 
@@ -21,12 +43,17 @@ class Scene {
         this.blue       = createColor(  0,127,212);
         this.red        = createColor(240, 31, 87);        
         this.robots = {};
+
+        this.robot_src = ["robots/robot1.png","robots/robot2.png","robots/robot3.png","robots/robot4.png"]
+        this.goal_src ="robots/goal1.png";
+
+
         var size = 0.9;
-        this.robots.yellow = new Robot(0.5,0.5,size,this.yellow);
-        this.robots.green  = new Robot(0.5,2.5,size,this.green);
-        this.robots.blue   = new Robot(2.5,0.5,size,this.blue);
-        this.robots.red    = new Robot(2.5,2.5,size,this.red);
-        
+        this.robots.yellow = new TexturedObj(0.5,0.5,size,this.yellow,this.robot_src[0]);
+        this.robots.green  = new TexturedObj(0.5,2.5,size,this.green,this.robot_src[1]);
+        this.robots.blue   = new TexturedObj(2.5,0.5,size,this.blue,this.robot_src[2]);
+        this.robots.red    = new TexturedObj(2.5,2.5,size,this.red,this.robot_src[3]);
+        this.goal = new TexturedObj(1.5,1.5,size,this.yellow, this.goal_src);
         this.board_size = 5;
         var right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
         var bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];

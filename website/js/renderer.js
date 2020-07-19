@@ -59,12 +59,13 @@ class Renderer{
         gl.clear(gl.COLOR_BUFFER_BIT);
         
         this._board_render(scene);
-//        _robots_goal_render(scene);
+        this._robots_goal_render(scene);
     }
 
 
     _initGLData(){
         this._initBoard();
+        this._initTextured();
 
     }
 
@@ -96,6 +97,41 @@ class Renderer{
         var offset = 0;
         var count = 6;
         gl.drawArrays(primitiveType, offset, count);
+    }
+    _robots_goal_render(scene){
+        gl.useProgram(this.programs.textured);
+        gl.bindVertexArray(this.vaos.board);
+        gl.activeTexture(gl.TEXTURE0);
+
+
+        for(let robot in scene.robots){
+            
+            gl.bindTexture(gl.TEXTURE_2D,scene.robots[robot].texture);
+            gl.uniform1i(this.uniformLoc.textured.image, 0);
+            gl.uniform1f(this.uniformLoc.textured.v_zoom, scene.v_zoom);
+            gl.uniform1f(this.uniformLoc.textured.aspect_ratio, this.aspect_ratio);
+            gl.uniform1f(this.uniformLoc.textured.size, scene.robots[robot].size);
+            gl.uniform2f(this.uniformLoc.textured.center, scene.center[1],scene.board_size-scene.center[0]);
+            gl.uniform3fv(this.uniformLoc.textured.color, scene.robots[robot].color);
+            gl.uniform2f(this.uniformLoc.textured.pos, scene.robots[robot].y,scene.board_size-scene.robots[robot].x);
+            var primitiveType = gl.TRIANGLES;
+            var offset = 0;
+            var count = 6;
+            gl.drawArrays(primitiveType, offset, count);
+        }
+        gl.bindTexture(gl.TEXTURE_2D,scene.goal.texture);
+        gl.uniform1i(this.uniformLoc.textured.image, 0);
+        gl.uniform1f(this.uniformLoc.textured.v_zoom, scene.v_zoom);
+        gl.uniform1f(this.uniformLoc.textured.aspect_ratio, this.aspect_ratio);
+        gl.uniform1f(this.uniformLoc.textured.size, scene.goal.size);
+        gl.uniform2f(this.uniformLoc.textured.center, scene.center[1],scene.board_size-scene.center[0]);
+        gl.uniform3fv(this.uniformLoc.textured.color, scene.goal.color);
+        gl.uniform2f(this.uniformLoc.textured.pos, scene.goal.y,scene.board_size-scene.goal.x);
+        var primitiveType = gl.TRIANGLES;
+        var offset = 0;
+        var count = 6;
+        gl.drawArrays(primitiveType, offset, count);
+        
     }
     _initBoard(){
         
@@ -204,6 +240,88 @@ class Renderer{
             board_color: gl.getUniformLocation(this.programs.board, "board_color"),
             grid_color: gl.getUniformLocation(this.programs.board, "grid_color"),
             wall_color: gl.getUniformLocation(this.programs.board, "wall_color"),
+        }
+        
+        this.vaos.board = gl.createVertexArray();
+        gl.bindVertexArray(this.vaos.board);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());    
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(quad),gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(this.attributeLoc.board.position);
+        var size=2;
+        var type=gl.FLOAT;
+        var normalize = false;
+        var stride = 0;
+        var offset = 0;
+        gl.vertexAttribPointer(this.attributeLoc.board.position,size,type,normalize,stride,offset);
+
+    }
+
+    _initTextured(){
+        
+        let vs = `#version 300 es
+        // an attribute will receive data from a buffer
+        in vec4 a_position;
+        uniform float size;
+        uniform float v_zoom;
+        uniform float aspect_ratio;
+        uniform vec2 center;
+        uniform vec2 pos;
+        out vec2 uv;
+        // all shaders have a main function
+        void main() {
+       
+          // gl_Position is a special variable a vertex shader
+          // is responsible for setting
+          uv = a_position.xy*0.5+0.5;
+          vec2 tmp = (a_position.xy*size*0.5 + pos) ;
+          gl_Position = vec4( (tmp  - center)*v_zoom
+                               + vec2(0.5),
+                               a_position.z,
+                               1.0);
+
+          
+          gl_Position = vec4((tmp-center)*v_zoom,
+          a_position.z,
+          1.0);
+          gl_Position.x = gl_Position.x/aspect_ratio;
+
+        }
+        `;
+
+        let fs = `#version 300 es
+        precision mediump float;
+        in vec2 uv;
+        out vec4 frag_color;
+        uniform sampler2D image;
+        uniform vec3 color;
+        void main() {
+          // gl_FragColor is a special variable a fragment shader
+          // is responsible for setting
+        
+
+                 
+          //frag_color = vec4(color,texture(image,uv).r);
+          frag_color = vec4(texture(image,uv));
+        
+        }
+        `;
+
+        let vertexShader = createShader(gl,gl.VERTEX_SHADER, vs);
+        let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER, fs);
+        this.programs.textured = createProgram(gl,vertexShader,fragmentShader);
+
+
+        this.attributeLoc.textured = {
+            position: gl.getAttribLocation(this.programs.textured, "a_position")
+        }
+        this.uniformLoc.textured = {
+            size: gl.getUniformLocation(this.programs.textured, "size"),
+            v_zoom: gl.getUniformLocation(this.programs.textured, "v_zoom"),
+            pos: gl.getUniformLocation(this.programs.textured, "pos"),
+            aspect_ratio: gl.getUniformLocation(this.programs.textured, "aspect_ratio"),
+            center: gl.getUniformLocation(this.programs.textured, "center"),
+            image: gl.getUniformLocation(this.programs.textured, "image"),
+            color: gl.getUniformLocation(this.programs.textured, "color")
         }
         
         this.vaos.board = gl.createVertexArray();
