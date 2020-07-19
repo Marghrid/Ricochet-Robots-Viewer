@@ -1,0 +1,28 @@
+body {
+	font-family: sans-serif;
+	margin: auto;
+	padding: 1%;
+	max-width: 800px;
+}
+footer {
+	display: inline-flex;
+	justify-content: center;
+	text-align: center;
+	font-size: 70%;
+}
+
+footer div {
+	padding: .5ex;
+	min-width: 16ex;
+	align-items: center;
+	align-content: center;
+	border-top: 2px solid gray;
+}
+footer div p {
+	text-align: center;
+	margin: .5em;
+}
+
+footer a {
+	text-decoration: none;
+}
