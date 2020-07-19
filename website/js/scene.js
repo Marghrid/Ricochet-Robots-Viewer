@@ -32,7 +32,7 @@ class Scene {
     constructor(board_size,right_walls,bottom_walls,positions, goal,goal_color){
         this.bgColor=createColor(240,240,240);
         this.board_color = createColor(240,240,240);
-        this.grid_color  = createColor(150,150,150);
+        this.grid_color  = createColor(180,180,180);
         this.wall_color  = createColor(30,30,30);
         this.grid_width = 0.02;
         
