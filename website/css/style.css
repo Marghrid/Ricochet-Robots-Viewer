@@ -4,6 +4,12 @@ body {
 	margin: auto;
 	padding: 1%;
 	max-width: 800px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+#c {
+	flex-grow: 0;
 }
 footer {
 	display: inline-flex;
