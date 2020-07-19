@@ -6,7 +6,6 @@ var quad = [-1.0,-1.0,
      1.0,-1.0,
      1.0,1.0];
 
-
 function createShader(gl,type,source){
     var shader = gl.createShader(type);
     gl.shaderSource(shader,source);
@@ -34,6 +33,10 @@ function createProgram(gl,vertexShader,fragmentShader){
     console.log(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
 } 
+
+
+
+
 
 
 class Renderer{
