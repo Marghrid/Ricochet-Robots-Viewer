@@ -14,9 +14,7 @@ class Clock{
         this.time = Date.now();
         return 0.001*(this.time-oldTime);
     }
-    
 }
-
 
 
 function setup(){
@@ -30,20 +28,22 @@ function setup(){
 
     renderer = new Renderer();
 
+    hello_files = ["hi", "hello", "hey"]
+    let hello_file = hello_files[Math.floor(Math.random() * hello_files.length)];
+    get_example_file(hello_file);
+    // let right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
+    // let bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];
+    // let board_size = 8;
+    // let positions={
+    //     yellow: [0.5,0.5],
+    //     green:  [0.5,2.5],
+    //     blue:   [2.5,0.5],
+    //     red:    [2.5,2.5],
+    // }
+    // let goal = [1.5,1.5]
+    // let goal_color = "red"
 
-
-    let right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
-    let bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];
-    let board_size = 8;
-    let positions={
-        yellow: [0.5,0.5],
-        green:  [0.5,2.5],
-        blue:   [2.5,0.5],
-        red:    [2.5,2.5],
-    }
-    let goal = [1.5,1.5]
-    let goal_color = "red"
-    scene = new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
+    scene = null; // new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
     clock = new Clock();
     time = 0;
 }
@@ -52,6 +52,7 @@ function setup(){
 function doUIstuff(){
 
 }
+
 
 function animate(){
     delta = clock.getDelta();
@@ -75,7 +76,7 @@ function animate(){
         time=-10;
         scene.change_board(size,right_walls,bottom_walls,positions,goal,goal_color)
     }*/
-    renderer.render(scene);
+    renderer.render();
     requestAnimationFrame(animate);
 }
 

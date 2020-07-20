@@ -34,37 +34,28 @@ function createProgram(gl,vertexShader,fragmentShader){
     gl.deleteProgram(program);
 } 
 
-
-
-
-
-
 class Renderer{
     constructor(){
         this.updateResolution();
         this._initGLData();
-        
     }
-
-
 
     updateResolution(){
         this.resolution = [canvas.width,canvas.height];
         this.aspect_ratio = canvas.width/canvas.height;
-        
     }
 
-    render(scene){
-                
+    render() {
+        if (scene == null) {
+          return;
+        }
         gl.disable(gl.DEPTH_TEST);
-        
         gl.clearColor(scene.bgColor[0],scene.bgColor[1],scene.bgColor[2], 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         
         this._board_render(scene);
         this._robots_goal_render(scene);
     }
-
 
     _initGLData(){
         this._initBoard();
@@ -167,13 +158,10 @@ class Renderer{
                                a_position.z,
                                1.0);
 
-          
           gl_Position = vec4((tmp-center)*v_zoom,
           a_position.z,
           1.0);
- 
-                                
-                               
+
           //gl_Position = a_position;
           //gl_Position.xy = gl_Position.xy*0.4;
           gl_Position.x = gl_Position.x/aspect_ratio;
@@ -230,7 +218,6 @@ class Renderer{
         let vertexShader = createShader(gl,gl.VERTEX_SHADER, vs);
         let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER, fs);
         this.programs.board = createProgram(gl,vertexShader,fragmentShader);
-
 
         this.attributeLoc.board = {
             position: gl.getAttribLocation(this.programs.board, "a_position")

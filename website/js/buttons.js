@@ -63,7 +63,10 @@ function show(rr_board) {
             goal_color = "yellow"
             break;
         
-        
     }
-    scene.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color)
+    if (scene == null) {
+        scene = new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
+    } else {
+        scene.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color)
+    }
 }
