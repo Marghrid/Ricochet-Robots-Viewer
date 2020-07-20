@@ -1,4 +1,4 @@
-function read_file(rr_file) {
+function read_instance_file(rr_file) {
   let rr_string;
   let rr_board;
   let reader = new FileReader();
@@ -9,6 +9,36 @@ function read_file(rr_file) {
         show(rr_board);
     }
     reader.readAsText(rr_file);
+}
+
+function read_solution_file(rr_file) {
+  let sol_string;
+  let sol;
+  let reader = new FileReader();
+  reader.onload = function(e) {
+        // cpf is a string with the file's contents
+        sol_string = reader.result;
+        sol = parse_solution(sol_string);
+        show_sol(sol);
+    }
+    reader.readAsText(rr_file);
+}
+
+function parse_solution(sol_string) {
+	const colors = ['R', 'G', 'B', 'Y']
+    const directions = ['u', 'd', 'l', 'r']
+	let lines = sol_string.split('\n');
+	let sol_size = parseInt(lines[0]);
+	solution = [];
+	for (let i = 1; i <= sol_size; ++i) {
+		line = lines[i].split(' ')
+		color = line[0]
+		direction = line[1].trim()
+		console.assert(colors.indexOf(color) >= 0, color + " not in " + colors)
+		console.assert(directions.indexOf(direction) >= 0, direction + " not in " + directions)
+		solution.push([color, direction]);
+	}
+	return solution
 }
 
 function parse_rr(rr_string) {
@@ -80,15 +110,15 @@ function get_example_file(ex_name) {
     sol_request.responseType = "blob";//force the HTTP response, response-type header to be blob
 
     rr_request.onload = function() {
-        rr_blob = rr_request.response;//rr_request.response is now a blob object
-        read_file(rr_blob);
+        rr_blob = rr_request.response; //rr_request.response is now a blob object
+        read_instance_file(rr_blob);
 
-        // sol_request.onload = function() {
-        //     sol_blob = sol_request.response;//sol_request.response is now a blob object
-        //     start_reading_sol(sol_blob);
+            sol_request.onload = function() {
+        	sol_blob = sol_request.response; //sol_request.response is now a blob object
+        	read_solution_file(sol_blob);
 
-        // }
-        // sol_request.send();
+        }
+        sol_request.send();
 
     }
     rr_request.send();

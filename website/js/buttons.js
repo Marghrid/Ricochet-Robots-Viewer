@@ -20,6 +20,10 @@ function example3_button() {
     get_example_file("i3");
 }
 
+function show_sol(solution) {
+    solution.forEach(el => console.log(el))
+}
+
 function show(rr_board) {
 	console.log(rr_board.size);
 	console.log(rr_board.robots);
