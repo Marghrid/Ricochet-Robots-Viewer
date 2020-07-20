@@ -57,6 +57,8 @@ class Renderer{
     render(scene){
                 
         gl.disable(gl.DEPTH_TEST);
+        //Is this necessary?
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         
         gl.clearColor(scene.bgColor[0],scene.bgColor[1],scene.bgColor[2], 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);

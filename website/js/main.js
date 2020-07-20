@@ -21,8 +21,10 @@ class Clock{
 
 function setup(){
     canvas = document.getElementById("c");
-    canvas.width = "600";
-    canvas.height = "400";
+    canvas.width = "1200";
+    canvas.height = "800";
+    canvas.style.width = "600px"
+    canvas.style.height = "400px"
     gl = canvas.getContext("webgl2",);
     if(!gl){
         error("No WEBGL");
