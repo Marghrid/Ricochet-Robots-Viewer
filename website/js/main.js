@@ -46,10 +46,14 @@ class Clock{
 var hq = true;
 
 function toggle_quality(){
-    let x = parseInt(canvas.style.width)
-    let y = parseInt(canvas.style.height)
-    console.log(x,y);
-    console.log(canvas.height)
+    let x = canvas.clientWidth;
+    let y = canvas.clientHeight;
+    canvas.style.width = x;
+    canvas.style.height = y>x?x:y;
+    
+    x *= window.devicePixelRatio;
+    y *= window.devicePixelRatio;
+    
     if(!hq){
         hq = true;
         x=x*2;
@@ -74,8 +78,6 @@ function setup(){
 
     canvas = document.getElementById("c");
     
-    canvas.style.width = "600px"
-    canvas.style.height = "400px"
     
 
     
