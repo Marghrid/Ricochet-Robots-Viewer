@@ -18,6 +18,111 @@ body {
 	image-rendering: pixelated;                 
 	-ms-interpolation-mode: nearest-neighbor;   */
 }
+
+#nav_box {
+	width: 40em;
+	margin-bottom: 0.6em;
+	
+	border-top: 0.03em solid #1f1f1f;
+	border-bottom: 0.03em solid #1f1f1f;
+	
+}
+#nav {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin: auto;
+}
+#nav div{
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	letter-spacing: 0.2em;
+	
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+
+}
+
+#nav div:hover{
+	background-color: #909090;
+}
+
+#nav div.active{
+	background-color: #1f1f1f;
+	color: rgb(240,240,240);
+}
+h1{
+	font-weight: 1;
+	letter-spacing: 0.6em;
+	font-family: serif;
+}
+h4{
+	font-weight: 1;
+	letter-spacing: 0.2em;
+	text-align: center;
+	width :20em;
+	border-bottom : 0.03em solid #1f1f1f;
+	border-top : 0.03em solid #1f1f1f;
+}
+
+#file_load_div{
+	
+	display: inline-flex;
+	padding-bottom: 1em;
+}
+
+#file_load_div label{
+	margin-right: 1em;
+	margin-left: 1em;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	width: 6em;
+	line-height: 1.6em;
+	text-align: center;
+	letter-spacing: 0.2em;
+	background-color: transparent;
+	border: 0.03em solid #1f1f1f;	
+	
+}
+
+.example_button{
+	margin-right: 1em;
+	margin-left: 1em;
+	padding-top: 1em;
+	padding-bottom: 1em;
+	width: 6em;
+	line-height: 1.6em;
+	text-align: center;
+	letter-spacing: 0.2em;
+	background-color: transparent;
+	border: 0.03em solid #1f1f1f;
+}
+
+.example_button:hover{
+	background-color: #909090;
+}
+.example_button:active{
+	background-color: #1f1f1f;
+	color: rgb(240,240,240);
+}
+
+#file_load_div label:hover{
+	background-color: #909090;
+}
+
+#file_load_div label:active{
+	background-color: #1f1f1f;
+}
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
 footer {
 	display: inline-flex;
 	justify-content: center;

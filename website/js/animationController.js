@@ -102,10 +102,7 @@ class AnimationController {
     }
     
     reset(){
-        console.log(scene.robots);
         for(let i in scene.robots){
-            console.log(scene.original_positions);
-            console.log(i);
             scene.robots[i].x = scene.original_positions[i].x;
             scene.robots[i].y = scene.original_positions[i].y;
         }

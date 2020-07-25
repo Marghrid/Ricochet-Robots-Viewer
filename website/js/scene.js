@@ -136,6 +136,22 @@ class Scene {
         this._updateTexture(right_walls,bottom_walls,[],[]);
     }
 
+    resetPositions(){
+        this.robots.yellow.x = this.original_positions.yellow.x;
+        this.robots.yellow.y = this.original_positions.yellow.y;
+        
+        this.robots.green.x = this.original_positions.green.x;
+        this.robots.green.y = this.original_positions.green.y;
+
+
+        this.robots.blue.x = this.original_positions.blue.x;
+        this.robots.blue.y = this.original_positions.blue.y;
+
+        
+        this.robots.red.x = this.original_positions.red.x;
+        this.robots.red.y = this.original_positions.red.y;
+    }
+
     _createTexture(){
         this.texture = gl.createTexture();
         this.texture_data = {}

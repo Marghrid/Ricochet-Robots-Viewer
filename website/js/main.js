@@ -1,8 +1,35 @@
 
-var gl, renderer, canvas,scene,clock, time;
+var gl, renderer, canvas,scene,clock, time,state;
 var animationController = null;
 function error(str){
     console.log(str);
+}
+
+class State{
+    constructor(){
+        this.buttons = {
+            play: document.getElementById("play_button"),
+            view: document.getElementById("view_button")
+        }
+        this.current_state = null
+    }
+
+    _activate(state){
+        controls.resetAnim = true;
+        if(this.current_state!=null){
+            this.buttons[this.current_state].classList.remove("active");
+        }
+        this.current_state = state
+        this.buttons[this.current_state].classList.add("active")
+    }
+
+    activateView(){
+        this._activate("view");
+    }
+    activatePlay(){
+        this._activate("play");
+    }
+
 }
 
 class Clock{
@@ -86,6 +113,20 @@ function setup(){
     scene = null; // new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
     clock = new Clock();
     time = 0;
+
+
+
+    state=new State();
+    setupButtons()
+}
+
+function setupButtons(){
+    state.buttons["play"].onclick = function(){
+        state.activatePlay();
+    }
+    state.buttons["view"].onclick = function(){
+        state.activateView();
+    }
 }
 
 
@@ -96,23 +137,25 @@ function doUIstuff(){
 
 function animate(){
     delta = clock.getDelta();
-    if(time>-1)
-        time += delta;
     doUIstuff();
 
-    if(controls.loadAnim){
-        if(current_sol != null && scene != null){
-            animationController = new AnimationController(current_sol, "linear",1.0,0.2);
-            animationController.step(controls.animStartTime);
-            controls.loadAnim = false;
-        }
-    } else {
-        if(controls.resetAnim){
-            animationController.reset();
-            controls.reset = false;
-        }
+    if(state.current_state=="view"){
+    //if(time>-1)
+    //    time += delta;
+        if(controls.loadAnim){
+            if(current_sol != null && scene != null){
+                animationController = new AnimationController(current_sol, "linear",1.0,0.2);
+                animationController.step(controls.animStartTime);
+                controls.loadAnim = false;
+            }
+        } else {
+            if(controls.resetAnim){
+                animationController.reset();
+                controls.resetAnim = false;
+            }
         if(controls.playAnim){
             animationController.step(delta);
+        }
         }
     }
     
@@ -142,6 +185,7 @@ function animate(){
 
 function main(){
     setup();
+
     requestAnimationFrame(animate);
 }
 
