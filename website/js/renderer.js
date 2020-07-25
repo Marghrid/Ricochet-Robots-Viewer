@@ -43,14 +43,14 @@ class Renderer{
     updateResolution(){
         this.resolution = [canvas.width,canvas.height];
         this.aspect_ratio = canvas.width/canvas.height;
+        gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
     }
 
     render() {
         if (scene == null) {
           return;
         }
-        gl.disable(gl.DEPTH_TEST);
-        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         gl.clearColor(scene.bgColor[0],scene.bgColor[1],scene.bgColor[2], 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         
@@ -61,6 +61,10 @@ class Renderer{
     _initGLData(){
         this._initBoard();
         this._initTextured();
+        
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     }
 
@@ -300,9 +304,7 @@ class Renderer{
           //return;
                  
           frag_color = vec4((color+f)*alpha,alpha);
-          if(alpha<0.05){
-              discard;
-          }
+          
           //frag_color = vec4(texture(image,uv));
         
         }
