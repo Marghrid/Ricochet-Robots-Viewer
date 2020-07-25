@@ -48,6 +48,25 @@ class Scene {
 
 
         var size = 0.9;
+        this.original_positions ={
+            yellow:{},
+            green:{},
+            blue:{},
+            red:{},
+        }
+        this.original_positions.yellow.x = positions.yellow[0];
+        this.original_positions.yellow.y = positions.yellow[1];
+        
+        this.original_positions.green.x = positions.green[0];
+        this.original_positions.green.y = positions.green[1];
+
+
+        this.original_positions.blue.x = positions.blue[0];
+        this.original_positions.blue.y = positions.blue[1];
+
+        this.original_positions.red.x = positions.red[0];
+        this.original_positions.red.y = positions.red[1];     
+
         this.robots.yellow = new TexturedObj(positions.yellow[0],positions.yellow[1],size,this.yellow,this.robot_src[0]);
         this.robots.green = new TexturedObj(positions.green[0],positions.green[1],size,this.green,this.robot_src[1]);
         this.robots.blue = new TexturedObj(positions.blue[0],positions.blue[1],size,this.blue,this.robot_src[2]);
@@ -66,6 +85,21 @@ class Scene {
         this.board_size = board_size;
         this.center = [this.board_size/2,this.board_size/2];
         this.v_zoom = 2/(this.board_size+6*this.grid_width);
+
+        
+        this.original_positions.yellow.x = positions.yellow[0];
+        this.original_positions.yellow.y = positions.yellow[1];
+        
+        this.original_positions.green.x = positions.green[0];
+        this.original_positions.green.y = positions.green[1];
+
+        this.original_positions.blue.x = positions.blue[0];
+        this.original_positions.blue.y = positions.blue[1];
+
+        this.original_positions.red.x = positions.red[0];
+        this.original_positions.red.y = positions.red[1];   
+
+        
         this.robots.yellow.x = positions.yellow[0];
         this.robots.yellow.y = positions.yellow[1];
         

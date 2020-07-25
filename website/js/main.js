@@ -1,6 +1,6 @@
 
 var gl, renderer, canvas,scene,clock, time;
-
+var animationController = null;
 function error(str){
     console.log(str);
 }
@@ -16,19 +16,57 @@ class Clock{
     }
 }
 
+var hq = true;
+
+function toggle_quality(){
+    let x = parseInt(canvas.style.width)
+    let y = parseInt(canvas.style.height)
+    console.log(x,y);
+    console.log(canvas.height)
+    if(!hq){
+        hq = true;
+        x=x*2;
+        y=y*2
+        canvas.height = y.toString();
+        canvas.width = x.toString(); 
+    } else {
+        hq = false;
+        canvas.height = y.toString();
+        canvas.width = x.toString();
+    }
+    
+    console.log(canvas.height)
+    renderer.updateResolution();
+}
+
+
+
 
 function setup(){
+    setupControls();
+
     canvas = document.getElementById("c");
-    canvas.width = "1200";
-    canvas.height = "800";
+    
     canvas.style.width = "600px"
     canvas.style.height = "400px"
+    
+
+    
     gl = canvas.getContext("webgl2",);
     if(!gl){
         error("No WEBGL");
     }
 
+
     renderer = new Renderer();
+    
+
+    //NOTE: This is necessary for init
+    toggle_quality();
+    
+    
+    //console.log(canvas.height,canvas.width)
+
 
     hello_files = ["hi", "hello", "hey"]
     let hello_file = hello_files[Math.floor(Math.random() * hello_files.length)];
@@ -61,6 +99,23 @@ function animate(){
     if(time>-1)
         time += delta;
     doUIstuff();
+
+    if(controls.loadAnim){
+        if(current_sol != null && scene != null){
+            animationController = new AnimationController(current_sol, "linear",1.0,0.2);
+            animationController.step(controls.animStartTime);
+            controls.loadAnim = false;
+        }
+    } else {
+        if(controls.resetAnim){
+            animationController.reset();
+            controls.reset = false;
+        }
+        if(controls.playAnim){
+            animationController.step(delta);
+        }
+    }
+    
     /*if(time>6){
         
         let right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
@@ -78,6 +133,7 @@ function animate(){
         time=-10;
         scene.change_board(size,right_walls,bottom_walls,positions,goal,goal_color)
     }*/
+    
     renderer.render();
     requestAnimationFrame(animate);
 }
