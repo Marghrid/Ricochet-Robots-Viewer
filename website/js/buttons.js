@@ -1,6 +1,6 @@
 function refresh_button() {
         let rr_file = document.getElementById('rr_file').files[0];
-        read_file(rr_file);
+        read_instance_file(rr_file);
     
 
     /*sol_file_change = false;
