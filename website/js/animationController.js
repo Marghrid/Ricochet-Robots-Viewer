@@ -27,8 +27,7 @@ class AnimationController {
         }
         this.move_set = move_set;
         this.reset();
-        
-        
+
         switch(interpolationType){
             case "linear":
                 this.interpolationFn = function(t,totalTime,a,b){
@@ -65,7 +64,7 @@ class AnimationController {
                     return 1.0 + (bounceEnd-bounceStart)*const_bounce - (t-bounceEnd)*const_bounce;
                     
                     
-                    return t;
+                    //return t;
                 }
                 break;
             default:

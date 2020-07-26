@@ -1,13 +1,24 @@
 
 var gl, renderer, canvas,scene,clock, time,state;
 var animationController = null;
+var animControlsParams = {
+    interpolationType: "linear",
+            timePropDistance: 1.0,
+            base_time: 0.2
+    
+};
+var playMoves = [];
 function error(str){
     console.log(str);
 }
 
+var grabbed = null;
+
+
 class State{
     constructor(){
         this.buttons = {
+            create: document.getElementById("create_button"),
             play: document.getElementById("play_button"),
             view: document.getElementById("view_button")
         }
@@ -20,17 +31,92 @@ class State{
             this.buttons[this.current_state].classList.remove("active");
         }
         this.current_state = state
-        this.buttons[this.current_state].classList.add("active")
+        this.buttons[this.current_state].classList.add("active");
     }
 
     activateView(){
+        let op = document.getElementById("options");
+        op.innerHTML = `
+        <h4>load example</h4>
+			  <div id="example_buttons_div">
+				<button type="button" class="example_button" onclick="example1_button()"> grid 5x5 </button>
+				<button type="button" class="example_button" onclick="example2_button()"> grid 6x6 </button>
+				<button type="button" class="example_button" onclick="example3_button()"> grid 8x8 </button>
+			  </div>
+		
+			<h4>or</h4>
+			<div id="file_load_div">
+				<input type="file" id="rr_file"  class="inputfile" >
+				<label for="rr_file">upload instance</label>
+				<input type="file" id="sol_file"  class="inputfile" >
+				<label for="sol_file">upload solution</label>
+				
+				<!--<button type="button" id="refresh_button" onclick="refresh_button()"> Refresh </button></p>-->
+            </div>
+        `
         this._activate("view");
     }
+    
     activatePlay(){
+        
+        let op = document.getElementById("options");
+        op.innerHTML = `
+        <button type="button" class="example_button" onclick="noop()"> save solution </button>
+        <h4>load example</h4>
+        <div id="example_buttons_div">
+          <button type="button" class="example_button" onclick="example1_button()"> grid 5x5 </button>
+          <button type="button" class="example_button" onclick="example2_button()"> grid 6x6 </button>
+          <button type="button" class="example_button" onclick="example3_button()"> grid 8x8 </button>
+        </div>
+  
+      <h4>or</h4>
+        <div id="file_load_div">
+            <input type="file" id="rr_file"  class="inputfile" >
+            <label for="rr_file">upload instance</label>          
+            <!--<button type="button" id="refresh_button" onclick="refresh_button()"> Refresh </button></p>-->
+            </div>
+        `;
         this._activate("play");
+        
+    }
+    activateCreate(){
+        
+        let op = document.getElementById("options");
+        op.innerHTML = `
+        <button type="button" class="example_button" onclick="noop()"> save instance </button>
+        <h4>creator tools</h4>
+        <label for="board_size">Board size</label>
+        
+        <input type="number" id="board_size" name="board_size" min=3 onchange="board_size_input()"><br><br>
+        <button type="button" class="example_button" onclick="scene.toggle_goal_color()">toggle goal color</button>
+       
+        <h4>how to</h4>
+        <p>hold LMB over a robot/goal to move it.<p>
+        <p>press LMB over a wall to activate/deactivate it.<p>
+        
+        
+        `
+        let a = document.getElementById("board_size");
+        a.value = scene.board_size;
+
+        this._activate("create");
     }
 
 }
+
+function board_size_input(){
+    let a = document.getElementById("board_size");
+    let size = a.value;
+    let positions = {
+        red: [0.5,0.5],
+        blue: [0.5,size-0.5],
+        green: [size-0.5, size-0.5],
+        yellow: [size-0.5,0.5]
+    }
+    let goal_position = [Math.floor(size*0.5) + 0.5,Math.floor(size*0.5)+0.5];
+    scene.change_board(Math.floor(size),[],[],positions,goal_position,"red");
+}
+
 
 class Clock{
     constructor(){
@@ -48,8 +134,9 @@ var hq = true;
 function toggle_quality(){
     let x = canvas.clientWidth;
     let y = canvas.clientHeight;
+    y = y>x?x:x*0.9;
     canvas.style.width = x;
-    canvas.style.height = y>x?x:y;
+    canvas.style.height = y;
     
     x *= window.devicePixelRatio;
     y *= window.devicePixelRatio;
@@ -70,14 +157,140 @@ function toggle_quality(){
     renderer.updateResolution();
 }
 
+function computeBarrier(pos){
+    let proxy_gw = scene.grid_width;
+    proxy_gw*=8;
+    let help_pos = {x:pos.x-proxy_gw, 
+                    y:pos.y-proxy_gw};
+    let int_pos = {x:Math.floor(help_pos.x), 
+                    y:Math.floor(help_pos.y)};
+    
+    let real_int_pos = {
+        x:Math.floor(pos.x),
+        y:Math.floor(pos.y)
+    }
+    help_pos.x -=int_pos.x;
+    help_pos.y -= int_pos.y;
+
+    
+    
+    if(help_pos.y > 1-2*proxy_gw){
+        if(int_pos.y >= 0 && int_pos.y<scene.board_size-1
+            && real_int_pos.x>=0 && real_int_pos.x <scene.board_size)
+                return {direction: "h", coord: [real_int_pos.x,int_pos.y]}
+    }
+
+    
+    if(help_pos.x > 1-2*proxy_gw){
+        if(int_pos.x >= 0 && int_pos.x<scene.board_size-1
+            && real_int_pos.y>=0 && real_int_pos.y <scene.board_size)
+                return {direction: "v", coord: [int_pos.x,real_int_pos.y]}
+    }
+    return null;
+}
+
+function grabObject(mousePos){
+    let intMousePos = {x:Math.floor(mousePos.x),y:Math.floor(mousePos.y)}
+    grabbed = null;
+    for(let i in scene.robots){
+        if(Math.floor(scene.robots[i].x) == intMousePos.x && 
+            Math.floor(scene.robots[i].y) == intMousePos.y){
+                grabbed = i;
+            }
+    
+    }
+    if(grabbed==null && 
+        Math.floor(scene.goal.x) == intMousePos.x && 
+        Math.floor(scene.goal.y) == intMousePos.y){
+        grabbed = "goal";
+    }
+    console.log("grabbed:",grabbed);
+
+}
+function dropObject(mousePos){
+    //TODO: check if dropping on top of something
+    if(grabbed == null)
+        return;
+    if(grabbed == "goal"){
+        scene.goal.x = Math.floor(mousePos.x)+0.5;
+        scene.goal.y = Math.floor(mousePos.y)+0.5;
+        return;  
+    } 
+    
+    scene.original_positions[grabbed].x = Math.floor(mousePos.x)+0.5;
+    scene.original_positions[grabbed].y = Math.floor(mousePos.y)+0.5;
+    scene.robots[grabbed].x = Math.floor(mousePos.x)+0.5;
+    scene.robots[grabbed].y = Math.floor(mousePos.y)+0.5;
+
+}
+
+function computeMousePos(event){
+    
+    let rect = canvas.getBoundingClientRect();
+    let mousePos = {x:event.clientX,y:event.clientY};
+    mousePos.x -=rect.left;
+    mousePos.y -= rect.top;
+    mousePos.x/=(rect.right-rect.left);
+    mousePos.y/=(rect.bottom-rect.top);
+    mousePos.x = mousePos.x*2-1;
+    mousePos.y = -(mousePos.y*2-1);
+
+    mousePos.x*=renderer.aspect_ratio;
+    mousePos.x/=scene.v_zoom;
+    mousePos.y/=scene.v_zoom;
+    mousePos.x+=scene.center[1];
+    mousePos.y+=scene.center[0];
+    let tmp = mousePos.x;
+    mousePos.x = scene.board_size - mousePos.y;
+    mousePos.y = tmp;
+    console.log(Math.floor(mousePos.x),Math.floor(mousePos.y));
+    return mousePos;
+
+}
+function mousedowncanvas(event){
+    grabbed = null;
+    if(state.current_state=="create"){
+        
+        let mousePos = computeMousePos(event)
+
+        let barrier = computeBarrier(mousePos);
+        console.log(barrier);
+        if(barrier != null ){
+            console.log(barrier.coord);
+            /*if(barrier.direction =="h")
+                scene._updateTexture([barrier.coord],[],[],[]);
+            else
+                scene._updateTexture([],[barrier.coord],[],[]);
+            */
+            if(barrier.direction =="h")
+                scene.toggleTexture([barrier.coord],[]);
+            else
+                scene.toggleTexture([],[barrier.coord]);
+        
+        } else {
+            grabObject(mousePos)
+        }
 
 
+    }
+}
+
+function mouseupcanvas(event){
+    let rect = canvas.getBoundingClientRect();
+    if(state.current_state=="create"){
+        
+        let mousePos = computeMousePos(event)
+        dropObject(mousePos)
+
+    }
+}
 
 function setup(){
     setupControls();
 
     canvas = document.getElementById("c");
-    
+    canvas.onmousedown = mousedowncanvas;
+    canvas.onmouseup = mouseupcanvas;
     
 
     
@@ -123,6 +336,9 @@ function setup(){
 }
 
 function setupButtons(){
+    state.buttons["create"].onclick = function(){
+        state.activateCreate();
+    }
     state.buttons["play"].onclick = function(){
         state.activatePlay();
     }
@@ -136,7 +352,27 @@ function doUIstuff(){
 
 }
 
-
+function runAnimation(delta){
+    if(controls.loadAnim){
+        if(current_sol != null && scene != null){
+            animationController = new AnimationController(current_sol, 
+                                                    animControlsParams.interpolationType,
+                                                    animControlsParams.timePropDistance,
+                                                    animControlsParams.base_time);
+            animationController.step(controls.animStartTime);
+            controls.loadAnim = false;
+        }
+    } else {
+        if(controls.resetAnim){
+            animationController.reset();
+            controls.resetAnim = false;
+        }
+    if(controls.playAnim){
+        animationController.step(delta);
+    }
+    }
+    
+}
 function animate(){
     delta = clock.getDelta();
     doUIstuff();
@@ -144,22 +380,47 @@ function animate(){
     if(state.current_state=="view"){
     //if(time>-1)
     //    time += delta;
-        if(controls.loadAnim){
-            if(current_sol != null && scene != null){
-                animationController = new AnimationController(current_sol, "linear",1.0,0.2);
-                animationController.step(controls.animStartTime);
-                controls.loadAnim = false;
+        runAnimation(delta);
+        
+    } else if(state.current_state=="play" && 0){
+        if(currentMoves.empty)
+            runAnimation(0);
+        else
+            runAnimation(delta);
+        
+        if(controls.rewind){
+            controls.rewind = false;
+            if(!currentMoves.empty){
+                playMoves.pop();
+                animationController = new AnimationController(playMoves, 
+                                        animControlsParams.interpolationType,
+                                        animControlsParams.timePropDistance,
+                                        animControlsParams.base_time);
+                let cumTime = 0;
+                for(let i in animationController.times){
+                    cumTime += animationController.times[i];
+                }
+                animationController.step(cumTime);
             }
-        } else {
-            if(controls.resetAnim){
-                animationController.reset();
-                controls.resetAnim = false;
+        }
+        if(controls.move!=null){
+            let cumTime = 0;
+            for(let i in animationController.times){
+                cumTime += animationController.times[i];
             }
-        if(controls.playAnim){
-            animationController.step(delta);
+
+            playMoves.push(/*todo: compute the next move)*/)
+            animationController = new AnimationController(playMoves, 
+                animControlsParams.interpolationType,
+                animControlsParams.timePropDistance,
+                animControlsParams.base_time);
+
+            animationController.step(cumTime);
+
         }
-        }
+
     }
+    
     
     /*if(time>6){
         

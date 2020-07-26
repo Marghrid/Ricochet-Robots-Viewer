@@ -5,3 +5,6 @@ function createColor(r,g,b){
 function makePos(a,b){
     return {x:a, y:b}
 }
+function noop(){
+    return;
+}

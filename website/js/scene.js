@@ -35,11 +35,13 @@ class Scene {
         this.grid_color  = createColor(180,180,180);
         this.wall_color  = createColor(30,30,30);
         this.grid_width = 0.02;
-        
-        this.yellow     = createColor(255,198, 41);
-        this.green      = createColor(  0,168,  6);
-        this.blue       = createColor(  0,127,212);
-        this.red        = createColor(240, 31, 87);        
+        this.colors = {
+
+            yellow:createColor(255,198, 41),
+            green: createColor(  0,168,  6),
+            blue:  createColor(  0,127,212),
+            red:   createColor(240, 31, 87) 
+        }       
         this.robots = {};
         
 
@@ -67,12 +69,12 @@ class Scene {
         this.original_positions.red.x = positions.red[0];
         this.original_positions.red.y = positions.red[1];     
 
-        this.robots.yellow = new TexturedObj(positions.yellow[0],positions.yellow[1],size,this.yellow,this.robot_src[0]);
-        this.robots.green = new TexturedObj(positions.green[0],positions.green[1],size,this.green,this.robot_src[1]);
-        this.robots.blue = new TexturedObj(positions.blue[0],positions.blue[1],size,this.blue,this.robot_src[2]);
-        this.robots.red = new TexturedObj(positions.red[0],positions.red[1],size,this.red,this.robot_src[3]);
-        this.goal = new TexturedObj(1.5,1.5,size,this.yellow, this.goal_src);
-        
+        this.robots.yellow = new TexturedObj(positions.yellow[0],positions.yellow[1],size,this.colors.yellow,this.robot_src[0]);
+        this.robots.green = new TexturedObj(positions.green[0],positions.green[1],size,this.colors.green,this.robot_src[1]);
+        this.robots.blue = new TexturedObj(positions.blue[0],positions.blue[1],size,this.colors.blue,this.robot_src[2]);
+        this.robots.red = new TexturedObj(positions.red[0],positions.red[1],size,this.colors.red,this.robot_src[3]);
+        this.goal = new TexturedObj(1.5,1.5,size,this.colors[goal_color], this.goal_src);
+        this.goal_color_str = goal_color;
 
         
 
@@ -80,13 +82,7 @@ class Scene {
         this.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color); 
 
     }
-
-    change_board(board_size, right_walls, bottom_walls,positions,goal,goal_color){
-        this.board_size = board_size;
-        this.center = [this.board_size/2,this.board_size/2];
-        this.v_zoom = 2/(this.board_size+6*this.grid_width);
-
-        
+    changeOriginalPositions(positions){
         this.original_positions.yellow.x = positions.yellow[0];
         this.original_positions.yellow.y = positions.yellow[1];
         
@@ -97,43 +93,48 @@ class Scene {
         this.original_positions.blue.y = positions.blue[1];
 
         this.original_positions.red.x = positions.red[0];
-        this.original_positions.red.y = positions.red[1];   
+        this.original_positions.red.y = positions.red[1];  
+    }
 
-        
-        this.robots.yellow.x = positions.yellow[0];
-        this.robots.yellow.y = positions.yellow[1];
-        
-        this.robots.green.x = positions.green[0];
-        this.robots.green.y = positions.green[1];
+    change_board(board_size, right_walls, bottom_walls,positions,goal,goal_color){
+        this.board_size = board_size;
+        this.center = [this.board_size/2,this.board_size/2];
+        this.v_zoom = 2/(this.board_size+6*this.grid_width);
 
+        this.goal_color_str = goal_color;
+        this.changeOriginalPositions(positions);
+        this.resetPositions(); 
 
-        this.robots.blue.x = positions.blue[0];
-        this.robots.blue.y = positions.blue[1];
-
-        
-        this.robots.red.x = positions.red[0];
-        this.robots.red.y = positions.red[1];
 
         this.goal.x = goal[0];
         this.goal.y = goal[1];
+        this.goal.color = this.colors[goal_color];
 
-        switch(goal_color){
-            case "red":
-                this.goal.color = this.red;
-                break;
-            case "blue":
-                this.goal.color = this.blue;
-                break;
-            case "yellow":
-                this.goal.color = this.yellow;
-                break;
-            case "green":
-            default:
-                this.goal.color = this.green;
-                break;
-        }
         this._change_data_size(board_size);
         this._updateTexture(right_walls,bottom_walls,[],[]);
+    }
+    toggle_goal_color(){
+
+        let ngc = null;
+        let stop = false;
+        for(let i in this.colors){
+            if(stop){
+                ngc = i;
+                break;
+            }
+            if(this.goal_color_str == i){
+                stop = true;
+            }
+        }
+        if (ngc == null)
+            ngc = Object.keys(this.colors)[0];
+        
+        this.set_goal_color(ngc);
+    }
+
+    set_goal_color(str){
+        this.goal_color_str = str;
+        this.goal.color = this.colors[str];
     }
 
     resetPositions(){
@@ -189,6 +190,28 @@ class Scene {
     }
     _convert_coordinates(pos){
         return [pos[1],this.board_size-1 - pos[0]]
+    }
+    toggleTexture(right,bottom){
+        for(let i in right){
+            let xy = this._convert_coordinates(right[i]);
+            let x = xy[0];
+            let y = xy[1];
+            let idx = this._get_texture_idx(x,y)
+            this.texture_data.data[idx] = this.texture_data.data[idx]>100?0:255;
+        }
+        for(let i in bottom){
+            let xy = this._convert_coordinates(bottom[i]);
+            let x = xy[0];
+            let y = xy[1];
+            let idx = this._get_texture_idx(x,y)
+            this.texture_data.data[idx+1] = this.texture_data.data[idx+1]>100?0:255;
+        }
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
+        gl.texImage2D(gl.TEXTURE_2D, this.texture_data.level, this.texture_data.internalFormat, 
+            this.texture_data.width, this.texture_data.height, 
+            this.texture_data.border, this.texture_data.format, 
+            this.texture_data.type, this.texture_data.data);
     }
     _updateTexture(add_right, add_bottom, remove_right, remove_bottom){
         for(let i in add_right){
