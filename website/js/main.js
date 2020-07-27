@@ -14,6 +14,8 @@ function error(str){
 
 var grabbed = null;
 
+var touchPos = null;
+
 
 class State{
     constructor(){
@@ -229,10 +231,10 @@ function dropObject(mousePos){
     grabbed = null;
 }
 
-function computeMousePos(event){
+function computeMousePos(mp){
     
     let rect = canvas.getBoundingClientRect();
-    let mousePos = {x:event.clientX,y:event.clientY};
+    let mousePos = {x:mp.x,y:mp.y};
     mousePos.x -=rect.left;
     mousePos.y -= rect.top;
     mousePos.x/=(rect.right-rect.left);
@@ -252,11 +254,11 @@ function computeMousePos(event){
     return mousePos;
 
 }
-function mousedowncanvas(event){
+function mousedowncanvas(mp){
     dropObject()
     if(state.current_state=="create"){
         
-        let mousePos = computeMousePos(event)
+        let mousePos = computeMousePos(mp)
 
         let barrier = computeBarrier(mousePos);
         console.log(barrier);
@@ -280,24 +282,25 @@ function mousedowncanvas(event){
     }
 }
 
-function mouseupcanvas(event){
+function mouseupcanvas(mp){
     let rect = canvas.getBoundingClientRect();
     if(state.current_state=="create"){
         
-        let mousePos = computeMousePos(event)
+        let mousePos = computeMousePos(mp)
         dropObject(mousePos)
 
     }
 }
-function mousemovecanvas(event){
+function mousemovecanvas(mp){
     if(grabbed!=null){
         let rect = canvas.getBoundingClientRect();
         if(state.current_state=="create"){
         
-            let mousePos = computeMousePos(event)
+            let mousePos = computeMousePos(mp)
             if(grabbed.id == "goal"){
                 scene.goal.x = mousePos.x;
                 scene.goal.y = mousePos.y;
+                return;
             }
             scene.robots[grabbed.id].x = mousePos.x;
             
@@ -308,15 +311,42 @@ function mousemovecanvas(event){
         
     }
 }
+
+function getPosFromMouse(event){
+    return {x:event.clientX,y:event.clientY};
+}
+
+function getPosFromTouch(event){
+    touchPos = {x:event.touches[0].clientX,y:event.touches[0].clientY};
+}
+
 function setup(){
     setupControls();
 
     canvas = document.getElementById("c");
-    canvas.onmousedown = mousedowncanvas;
-    canvas.onmouseup = mouseupcanvas;
-    canvas.onmousemove = mousemovecanvas;
-    canvas.ontouchstart = mousedowncanvas;
-    canvas.ontouchend = mouseupcanvas;
+    canvas.onmousedown = function(event){
+            mousedowncanvas(getPosFromMouse(event));
+        };
+    canvas.onmouseup = function(event){
+        mouseupcanvas(getPosFromMouse(event));
+    };
+    canvas.onmousemove = function(event){
+        mousemovecanvas(getPosFromMouse(event));
+    };
+    canvas.ontouchstart = function(event){
+        event.preventDefault();
+        getPosFromTouch(event);
+        mousedowncanvas(touchPos);
+    };
+    canvas.ontouchend =function(event){
+        event.preventDefault();
+        mouseupcanvas(touchPos);
+    };
+    canvas.ontouchmove =function(event){
+        event.preventDefault();
+        getPosFromTouch(event);
+        mousemovecanvas(touchPos);
+    };
 
     
     gl = canvas.getContext("webgl2",);
