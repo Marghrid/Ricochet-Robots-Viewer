@@ -191,18 +191,22 @@ function computeBarrier(pos){
 
 function grabObject(mousePos){
     let intMousePos = {x:Math.floor(mousePos.x),y:Math.floor(mousePos.y)}
-    grabbed = null;
+    
     for(let i in scene.robots){
         if(Math.floor(scene.robots[i].x) == intMousePos.x && 
             Math.floor(scene.robots[i].y) == intMousePos.y){
-                grabbed = i;
+                grabbed = {id: i, 
+                           pos: {x:Math.floor(scene.robots[i].x),
+                                 y:Math.floor(scene.robots[i].y) }
+                };
             }
     
     }
     if(grabbed==null && 
         Math.floor(scene.goal.x) == intMousePos.x && 
         Math.floor(scene.goal.y) == intMousePos.y){
-        grabbed = "goal";
+        grabbed = {id: "goal", 
+                 pos: {x:Math.floor(scene.goal.x),y:Math.floor(scene.goal.y)}};
     }
     console.log("grabbed:",grabbed);
 
@@ -211,17 +215,18 @@ function dropObject(mousePos){
     //TODO: check if dropping on top of something
     if(grabbed == null)
         return;
-    if(grabbed == "goal"){
+    if(grabbed.id == "goal"){
         scene.goal.x = Math.floor(mousePos.x)+0.5;
         scene.goal.y = Math.floor(mousePos.y)+0.5;
+        grabbed = null;
         return;  
     } 
     
-    scene.original_positions[grabbed].x = Math.floor(mousePos.x)+0.5;
-    scene.original_positions[grabbed].y = Math.floor(mousePos.y)+0.5;
-    scene.robots[grabbed].x = Math.floor(mousePos.x)+0.5;
-    scene.robots[grabbed].y = Math.floor(mousePos.y)+0.5;
-
+    scene.original_positions[grabbed.id].x = Math.floor(mousePos.x)+0.5;
+    scene.original_positions[grabbed.id].y = Math.floor(mousePos.y)+0.5;
+    scene.robots[grabbed.id].x = Math.floor(mousePos.x)+0.5;
+    scene.robots[grabbed.id].y = Math.floor(mousePos.y)+0.5;
+    grabbed = null;
 }
 
 function computeMousePos(event){
@@ -248,7 +253,7 @@ function computeMousePos(event){
 
 }
 function mousedowncanvas(event){
-    grabbed = null;
+    dropObject()
     if(state.current_state=="create"){
         
         let mousePos = computeMousePos(event)
@@ -284,14 +289,34 @@ function mouseupcanvas(event){
 
     }
 }
-
+function mousemovecanvas(event){
+    if(grabbed!=null){
+        let rect = canvas.getBoundingClientRect();
+        if(state.current_state=="create"){
+        
+            let mousePos = computeMousePos(event)
+            if(grabbed.id == "goal"){
+                scene.goal.x = mousePos.x;
+                scene.goal.y = mousePos.y;
+            }
+            scene.robots[grabbed.id].x = mousePos.x;
+            
+            scene.robots[grabbed.id].y = mousePos.y;
+        
+        
+        }
+        
+    }
+}
 function setup(){
     setupControls();
 
     canvas = document.getElementById("c");
     canvas.onmousedown = mousedowncanvas;
     canvas.onmouseup = mouseupcanvas;
-    
+    canvas.onmousemove = mousemovecanvas;
+    canvas.ontouchstart = mousedowncanvas;
+    canvas.ontouchend = mouseupcanvas;
 
     
     gl = canvas.getContext("webgl2",);
@@ -419,6 +444,8 @@ function animate(){
 
         }
 
+    } else if(state.current_state=="create") {
+        
     }
     
     
