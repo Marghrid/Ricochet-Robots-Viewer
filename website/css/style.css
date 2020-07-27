@@ -9,7 +9,6 @@ body {
 	align-items: center;
 }
 #c {
-	
 	flex-grow: 1;
 	/*
 	image-rendering: optimizeSpeed;            
@@ -138,17 +137,23 @@ h4{
 	z-index: -1;
 }
 
+a {
+	color: rgba(0, 0, 0, .7);
+	font-weight: bold;
+	text-decoration: none;
+}
+
 footer {
 	display: inline-flex;
 	justify-content: center;
 	text-align: center;
 	font-size: 70%;
 	width: 100%;
+	margin: 3em;
 }
 
 footer div {
 	padding: .5ex;
-	min-width: 16ex;
 	align-items: center;
 	align-content: center;
 	border-top: 2px solid gray;
