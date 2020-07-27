@@ -29,6 +29,7 @@ class State{
 
     _activate(state){
         controls.resetAnim = true;
+        scene.resetPositions();
         if(this.current_state!=null){
             this.buttons[this.current_state].classList.remove("active");
         }
@@ -85,7 +86,7 @@ class State{
         
         let op = document.getElementById("options");
         op.innerHTML = `
-        <button type="button" class="example_button" onclick="noop()"> save instance </button>
+        <button type="button" class="example_button" onclick="saveBoard()"> save instance </button>
         <h4>creator tools</h4>
         <label for="board_size">Board size</label>
         
@@ -212,6 +213,56 @@ function grabObject(mousePos){
     }
     console.log("grabbed:",grabbed);
 
+}
+
+function saveBoard(){
+    console.log("save");
+    if(grabbed != null){
+        return;
+    }
+    let color = {
+        red: "R",
+        blue: "B",
+        green: "G",
+        yellow: "Y"
+    }
+    var file = "";
+    file += String(scene.board_size) + "\n";
+    for(let i in scene.original_positions){
+        file += color[i] + " " + 
+            String(Math.floor(scene.original_positions[i].x)+1) + " " +
+            String(Math.floor(scene.original_positions[i].y)+1) + "\n";
+    }
+    file += color[scene.goal_color_str] + " " +
+            String(Math.floor(scene.goal.x)+1) + " " + 
+            String(Math.floor(scene.goal.y)+1) + "\n";
+    
+
+
+    let count = 0;
+    barriers = scene.getBarriers();
+    file+= String(barriers.length) + "\n";
+    for(let i in barriers){
+        if(barriers[i].direction == "h"){
+            file+=  String(barriers[i].pos.x+1) +" " + String(barriers[i].pos.y+1) + " r\n";  
+        } else {
+            file+= String(barriers[i].pos.x+1) +" " + String(barriers[i].pos.y+1) + " d\n";
+        }
+    }
+    var blob = new Blob([file], {type: "text/plain;charset=utf-8"});
+	saveAs(blob, "instance.txt");
+}
+
+function saveAs(blob,fname){
+    var a = document.createElement("a");
+	a.href = URL.createObjectURL(blob);
+	a.download = fname;
+	document.body.appendChild(a);
+	a.click();
+	setTimeout(function() {
+        window.URL.revokeObjectURL(a.href); 
+	    document.body.removeChild(a); 
+	}, 0)
 }
 function dropObject(mousePos){
     //TODO: check if dropping on top of something

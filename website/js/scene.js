@@ -82,6 +82,35 @@ class Scene {
         this.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color); 
 
     }
+    getBarriers(){
+        let barriers = [];
+        for(let i = 0; i<scene.board_size; i++){
+            for(let j = 0; j<scene.board_size; j++){
+                //j is horizontal coord
+                //if is not last
+                let xy = this._convert_coordinates([i,j]);
+                let x = xy[0];
+                let y = xy[1];
+                if(j<scene.board_size-1){                
+                    if(this.texture_data.data[this._get_texture_idx(x,y)]>100){
+                        barriers.push({
+                            direction: "h",
+                            pos: {x:i,y:j}
+                        })
+                    }
+                }
+                if(i<scene.board_size-1){                
+                    if(this.texture_data.data[this._get_texture_idx(x,y)+1]>100){
+                        barriers.push({
+                            direction: "v",
+                            pos: {x:i,y:j}
+                        })
+                    }
+                }
+            }
+        }
+        return barriers;
+    }
     changeOriginalPositions(positions){
         this.original_positions.yellow.x = positions.yellow[0];
         this.original_positions.yellow.y = positions.yellow[1];
