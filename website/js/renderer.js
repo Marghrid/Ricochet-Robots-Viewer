@@ -103,7 +103,30 @@ class Renderer{
         gl.activeTexture(gl.TEXTURE0);
 
        
-
+        gl.bindTexture(gl.TEXTURE_2D,scene.goal.texture);
+        gl.uniform1i(this.uniformLoc.textured.image, 0);
+        gl.uniform1f(this.uniformLoc.textured.v_zoom, scene.v_zoom);
+        gl.uniform1f(this.uniformLoc.textured.aspect_ratio, this.aspect_ratio);
+        gl.uniform1f(this.uniformLoc.textured.size, scene.goal.size);
+        gl.uniform2f(this.uniformLoc.textured.center, scene.center[1],scene.board_size-scene.center[0]);
+        
+        let avgcol = scene.goal.color[0] + scene.goal.color[1] + scene.goal.color[2];
+        avgcol/=3;
+        avgcol = 0.95;
+        let param = 0.4;
+        let scale = 1;
+        let col = [
+            (scene.goal.color[0]*(1-param) + avgcol*param)*scale,            
+            (scene.goal.color[1]*(1-param) + avgcol*param)*scale,            
+            (scene.goal.color[2]*(1-param) + avgcol*param)*scale
+        ]        
+        
+        gl.uniform3fv(this.uniformLoc.textured.color, col);
+        gl.uniform2f(this.uniformLoc.textured.pos, scene.goal.y,scene.board_size-scene.goal.x);
+        var primitiveType = gl.TRIANGLES;
+        var offset = 0;
+        var count = 6;
+        gl.drawArrays(primitiveType, offset, count);
 
         for(let robot in scene.robots){
             
@@ -120,18 +143,7 @@ class Renderer{
             var count = 6;
             gl.drawArrays(primitiveType, offset, count);
         }
-        gl.bindTexture(gl.TEXTURE_2D,scene.goal.texture);
-        gl.uniform1i(this.uniformLoc.textured.image, 0);
-        gl.uniform1f(this.uniformLoc.textured.v_zoom, scene.v_zoom);
-        gl.uniform1f(this.uniformLoc.textured.aspect_ratio, this.aspect_ratio);
-        gl.uniform1f(this.uniformLoc.textured.size, scene.goal.size);
-        gl.uniform2f(this.uniformLoc.textured.center, scene.center[1],scene.board_size-scene.center[0]);
-        gl.uniform3fv(this.uniformLoc.textured.color, scene.goal.color);
-        gl.uniform2f(this.uniformLoc.textured.pos, scene.goal.y,scene.board_size-scene.goal.x);
-        var primitiveType = gl.TRIANGLES;
-        var offset = 0;
-        var count = 6;
-        gl.drawArrays(primitiveType, offset, count);
+       
         
     }
     _initBoard(){

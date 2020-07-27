@@ -217,17 +217,34 @@ function dropObject(mousePos){
     //TODO: check if dropping on top of something
     if(grabbed == null)
         return;
+
+    let pos = {x:Math.floor(mousePos.x),y:Math.floor(mousePos.y)}
+    if(pos.x<0 || pos.y<0 || pos.x>=scene.board_size||pos.y>=scene.board_size){
+        pos.x = grabbed.pos.x;
+        pos.y = grabbed.pos.y;
+    }
+     
     if(grabbed.id == "goal"){
-        scene.goal.x = Math.floor(mousePos.x)+0.5;
-        scene.goal.y = Math.floor(mousePos.y)+0.5;
+        
+        scene.goal.x = pos.x+0.5;
+        scene.goal.y = pos.y+0.5;
         grabbed = null;
         return;  
-    } 
+    }
+
+    for(let i in scene.original_positions){
+          if(pos.x == Math.floor(scene.original_positions[i].x) &&
+            pos.y == Math.floor(scene.original_positions[i].y) ){
+            pos.x = grabbed.pos.x;
+            pos.y = grabbed.pos.y;
+            break;
+        }
+    }
     
-    scene.original_positions[grabbed.id].x = Math.floor(mousePos.x)+0.5;
-    scene.original_positions[grabbed.id].y = Math.floor(mousePos.y)+0.5;
-    scene.robots[grabbed.id].x = Math.floor(mousePos.x)+0.5;
-    scene.robots[grabbed.id].y = Math.floor(mousePos.y)+0.5;
+    scene.original_positions[grabbed.id].x = pos.x+0.5;
+    scene.original_positions[grabbed.id].y =pos.y+0.5;
+    scene.robots[grabbed.id].x = pos.x+0.5;
+    scene.robots[grabbed.id].y =pos.y+0.5;
     grabbed = null;
 }
 
@@ -250,16 +267,16 @@ function computeMousePos(mp){
     let tmp = mousePos.x;
     mousePos.x = scene.board_size - mousePos.y;
     mousePos.y = tmp;
-    console.log(Math.floor(mousePos.x),Math.floor(mousePos.y));
+   // console.log(Math.floor(mousePos.x),Math.floor(mousePos.y));
     return mousePos;
 
 }
 function mousedowncanvas(mp){
-    dropObject()
+    
     if(state.current_state=="create"){
         
         let mousePos = computeMousePos(mp)
-
+        dropObject(mousePos)
         let barrier = computeBarrier(mousePos);
         console.log(barrier);
         if(barrier != null ){
