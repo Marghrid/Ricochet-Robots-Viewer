@@ -124,6 +124,18 @@ class Scene {
         this.original_positions.red.x = positions.red[0];
         this.original_positions.red.y = positions.red[1];  
     }
+    
+    isGoal(){
+        return (Math.floor(this.robots[this.goal_color_str].x)
+                    == Math.floor(this.goal.x) &&
+                    Math.floor(this.robots[this.goal_color_str].y)
+                        == Math.floor(this.goal.y));
+    }
+
+    compute_move(movement){
+        //TODO!
+
+    }
 
     change_board(board_size, right_walls, bottom_walls,positions,goal,goal_color){
         this.board_size = board_size;

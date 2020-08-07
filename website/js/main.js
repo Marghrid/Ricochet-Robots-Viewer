@@ -12,9 +12,7 @@ function error(str){
     console.log(str);
 }
 
-var grabbed = null;
 
-var touchPos = null;
 
 
 class State{
@@ -94,7 +92,7 @@ class State{
         <button type="button" class="example_button" onclick="scene.toggle_goal_color()">toggle goal color</button>
        
         <h4>how to</h4>
-        <p>hold LMB over a robot/goal to move it.<p>
+        <p>drag a robot/goal to move it.<p>
         <p>press LMB over a wall to activate/deactivate it.<p>
         
         
@@ -198,26 +196,85 @@ function grabObject(mousePos){
     for(let i in scene.robots){
         if(Math.floor(scene.robots[i].x) == intMousePos.x && 
             Math.floor(scene.robots[i].y) == intMousePos.y){
-                grabbed = {id: i, 
+                controls.grabbed = {id: i, 
                            pos: {x:Math.floor(scene.robots[i].x),
                                  y:Math.floor(scene.robots[i].y) }
                 };
             }
     
     }
-    if(grabbed==null && 
+    if(controls.grabbed==null && 
         Math.floor(scene.goal.x) == intMousePos.x && 
         Math.floor(scene.goal.y) == intMousePos.y){
-        grabbed = {id: "goal", 
+        controls.grabbed = {id: "goal", 
                  pos: {x:Math.floor(scene.goal.x),y:Math.floor(scene.goal.y)}};
     }
-    console.log("grabbed:",grabbed);
+    console.log("controls.grabbed:",controls.grabbed);
+
+
+    
+}
+
+function moveStart(mousePos){
+    let intMousePos = {x:Math.floor(mousePos.x),y:Math.floor(mousePos.y)}
+    
+    for(let i in scene.robots){
+        if(Math.floor(scene.robots[i].x) == intMousePos.x && 
+            Math.floor(scene.robots[i].y) == intMousePos.y){
+                controls.moved = {id:i,pos: mousePos}
+            
+            }
+    
+    }
+    
+    console.log("controls.moved:",controls.moved);
 
 }
 
+function moveEnd(mousePos){
+    //TODO: check if dropping on top of something
+    //TODO: constant: 0.5
+    let eps = 0.5;
+    
+    if(controls.moved == null)
+        return;
+
+    let delta = {x: mousePos.x-controls.moved.pos.x,
+             y:  mousePos.y-controls.moved.pos.y};
+    
+    if(delta.x*delta.x+delta.y*delta.y < eps){
+        controls.moved == null;
+        return;
+    }
+    let direction = "r";
+    //if horizontal
+    if(Math.abs(delta.x) >Math.abs(delta.y)){
+        if(delta.x > 0){
+            direction = "d";
+        } else {
+            direction = "u";
+        }
+    } else /*vertical*/ {
+        if(delta.y>0){
+            direction = "r";
+        } else {
+           direction = "l";
+       }
+    }
+
+    let robot = controls.moved.id;
+
+    makeMove(robot,direction);
+}
+
+function makeMove(robot,direction){
+    console.log("moving",robot,"in direction",direction);
+    
+    
+}
 function saveBoard(){
     console.log("save");
-    if(grabbed != null){
+    if(controls.grabbed != null){
         return;
     }
     let color = {
@@ -266,37 +323,37 @@ function saveAs(blob,fname){
 }
 function dropObject(mousePos){
     //TODO: check if dropping on top of something
-    if(grabbed == null)
+    if(controls.grabbed == null)
         return;
 
     let pos = {x:Math.floor(mousePos.x),y:Math.floor(mousePos.y)}
     if(pos.x<0 || pos.y<0 || pos.x>=scene.board_size||pos.y>=scene.board_size){
-        pos.x = grabbed.pos.x;
-        pos.y = grabbed.pos.y;
+        pos.x = controls.grabbed.pos.x;
+        pos.y = controls.grabbed.pos.y;
     }
      
-    if(grabbed.id == "goal"){
+    if(controls.grabbed.id == "goal"){
         
         scene.goal.x = pos.x+0.5;
         scene.goal.y = pos.y+0.5;
-        grabbed = null;
+        controls.grabbed = null;
         return;  
     }
 
     for(let i in scene.original_positions){
           if(pos.x == Math.floor(scene.original_positions[i].x) &&
             pos.y == Math.floor(scene.original_positions[i].y) ){
-            pos.x = grabbed.pos.x;
-            pos.y = grabbed.pos.y;
+            pos.x = controls.grabbed.pos.x;
+            pos.y = controls.grabbed.pos.y;
             break;
         }
     }
     
-    scene.original_positions[grabbed.id].x = pos.x+0.5;
-    scene.original_positions[grabbed.id].y =pos.y+0.5;
-    scene.robots[grabbed.id].x = pos.x+0.5;
-    scene.robots[grabbed.id].y =pos.y+0.5;
-    grabbed = null;
+    scene.original_positions[controls.grabbed.id].x = pos.x+0.5;
+    scene.original_positions[controls.grabbed.id].y =pos.y+0.5;
+    scene.robots[controls.grabbed.id].x = pos.x+0.5;
+    scene.robots[controls.grabbed.id].y =pos.y+0.5;
+    controls.grabbed = null;
 }
 
 function computeMousePos(mp){
@@ -323,10 +380,10 @@ function computeMousePos(mp){
 
 }
 function mousedowncanvas(mp){
+    let mousePos = computeMousePos(mp);
     
     if(state.current_state=="create"){
         
-        let mousePos = computeMousePos(mp)
         dropObject(mousePos)
         let barrier = computeBarrier(mousePos);
         console.log(barrier);
@@ -347,32 +404,38 @@ function mousedowncanvas(mp){
         }
 
 
+    } else if (state.current_state =="play"){
+        //TODO: drop object?
+        moveStart(mousePos);
     }
 }
 
 function mouseupcanvas(mp){
     let rect = canvas.getBoundingClientRect();
+    let mousePos = computeMousePos(mp)
     if(state.current_state=="create"){
         
-        let mousePos = computeMousePos(mp)
+       
         dropObject(mousePos)
 
+    } else if(state.current_state=="play"){
+        moveEnd(mousePos);
     }
 }
 function mousemovecanvas(mp){
-    if(grabbed!=null){
+    if(controls.grabbed!=null){
         let rect = canvas.getBoundingClientRect();
         if(state.current_state=="create"){
         
             let mousePos = computeMousePos(mp)
-            if(grabbed.id == "goal"){
+            if(controls.grabbed.id == "goal"){
                 scene.goal.x = mousePos.x;
                 scene.goal.y = mousePos.y;
                 return;
             }
-            scene.robots[grabbed.id].x = mousePos.x;
+            scene.robots[controls.grabbed.id].x = mousePos.x;
             
-            scene.robots[grabbed.id].y = mousePos.y;
+            scene.robots[controls.grabbed.id].y = mousePos.y;
         
         
         }
@@ -385,7 +448,7 @@ function getPosFromMouse(event){
 }
 
 function getPosFromTouch(event){
-    touchPos = {x:event.touches[0].clientX,y:event.touches[0].clientY};
+    controls.touchPos = {x:event.touches[0].clientX,y:event.touches[0].clientY};
 }
 
 function setup(){
@@ -404,16 +467,16 @@ function setup(){
     canvas.ontouchstart = function(event){
         event.preventDefault();
         getPosFromTouch(event);
-        mousedowncanvas(touchPos);
+        mousedowncanvas(controls.touchPos);
     };
     canvas.ontouchend =function(event){
         event.preventDefault();
-        mouseupcanvas(touchPos);
+        mouseupcanvas(controls.touchPos);
     };
     canvas.ontouchmove =function(event){
         event.preventDefault();
         getPosFromTouch(event);
-        mousemovecanvas(touchPos);
+        mousemovecanvas(controls.touchPos);
     };
 
     
@@ -496,6 +559,46 @@ function runAnimation(delta){
     }
     
 }
+function move(movement){
+    if(animationController.idx != animationController.moves.length ||
+        animationController.time<animationController.times[animationController.idx])
+        return;
+    else {
+        let m =scene.compute_move(movement)
+        playMoves.push(m);
+        animationController = new AnimationController(playMoves, 
+                            animControlsParams.interpolationType,
+                            animControlsParams.timePropDistance,
+                            animControlsParams.base_time);
+        let cumTime = 0;
+        for(let i = 0; i<animationController.times.length-1; i++){
+            cumTime += animationController.times[i];
+        }
+        animationController.step(cumTime);
+    
+    }
+}
+function undo(){
+    
+    if(animationController.idx != animationController.moves.length ||
+        animationController.time<animationController.times[animationController.idx])
+        return;
+
+    controls.rewind = false;
+    if(!playMoves.empty){
+        playMoves.pop();
+        animationController = new AnimationController(playMoves, 
+                                        animControlsParams.interpolationType,
+                                        animControlsParams.timePropDistance,
+                                        animControlsParams.base_time);
+                let cumTime = 0;
+                for(let i in animationController.times){
+                    cumTime += animationController.times[i];
+                }
+                animationController.step(cumTime);
+            }
+}
+
 function animate(){
     delta = clock.getDelta();
     doUIstuff();
@@ -512,19 +615,7 @@ function animate(){
             runAnimation(delta);
         
         if(controls.rewind){
-            controls.rewind = false;
-            if(!currentMoves.empty){
-                playMoves.pop();
-                animationController = new AnimationController(playMoves, 
-                                        animControlsParams.interpolationType,
-                                        animControlsParams.timePropDistance,
-                                        animControlsParams.base_time);
-                let cumTime = 0;
-                for(let i in animationController.times){
-                    cumTime += animationController.times[i];
-                }
-                animationController.step(cumTime);
-            }
+            
         }
         if(controls.move!=null){
             let cumTime = 0;

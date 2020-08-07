@@ -7,5 +7,7 @@ function setupControls(){
         resetAnim: false,
         loadAnim: true,
         animStartTime: 0.0,
+        grabbed: null,
+        touchPos: null
     }
 }
