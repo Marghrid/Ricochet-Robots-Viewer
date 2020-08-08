@@ -7,7 +7,6 @@ var animControlsParams = {
             base_time: 0.2
     
 };
-var playMoves = [];
 function error(str){
     console.log(str);
 }
@@ -28,6 +27,7 @@ class State{
     _activate(state){
         controls.resetAnim = true;
         scene.resetPositions();
+        animationController.replaceData(new Solution());
         if(this.current_state!=null){
             this.buttons[this.current_state].classList.remove("active");
         }
@@ -264,12 +264,12 @@ function moveEnd(mousePos){
 
     let robot = controls.moved.id;
 
-    makeMove(robot,direction);
+    execute_move(robot,direction);
 }
 
-function makeMove(robot,direction){
+function execute_move(robot,direction){
     console.log("moving",robot,"in direction",direction);
-    
+    animationController.solution.addMove(makeMovement(robot,direction));
     
 }
 function saveBoard(){
@@ -515,8 +515,6 @@ function setup(){
     clock = new Clock();
     time = 0;
 
-
-
     state=new State();
     setupButtons()
 }
@@ -539,7 +537,7 @@ function doUIstuff(){
 }
 
 function runAnimation(delta){
-    if(controls.loadAnim){
+    /*if(controls.loadAnim){
         if(current_sol != null && scene != null){
             animationController = new AnimationController(current_sol, 
                                                     animControlsParams.interpolationType,
@@ -556,9 +554,18 @@ function runAnimation(delta){
     if(controls.playAnim){
         animationController.step(delta);
     }
+    }*/
+    if(controls.resetAnim){
+        
+        animationController.reset();
+        controls.resetAnim = false;
+    }
+    if(controls.playAnim){
+        animationController.step(delta);
     }
     
 }
+/*
 function move(movement){
     if(animationController.idx != animationController.moves.length ||
         animationController.time<animationController.times[animationController.idx])
@@ -598,40 +605,19 @@ function undo(){
                 animationController.step(cumTime);
             }
 }
+*/
 
 function animate(){
     delta = clock.getDelta();
     doUIstuff();
-
+   
     if(state.current_state=="view"){
     //if(time>-1)
     //    time += delta;
         runAnimation(delta);
         
-    } else if(state.current_state=="play" && 0){
-        if(currentMoves.empty)
-            runAnimation(0);
-        else
-            runAnimation(delta);
-        
-        if(controls.rewind){
-            
-        }
-        if(controls.move!=null){
-            let cumTime = 0;
-            for(let i in animationController.times){
-                cumTime += animationController.times[i];
-            }
-
-            playMoves.push(/*todo: compute the next move)*/)
-            animationController = new AnimationController(playMoves, 
-                animControlsParams.interpolationType,
-                animControlsParams.timePropDistance,
-                animControlsParams.base_time);
-
-            animationController.step(cumTime);
-
-        }
+    } else if(state.current_state=="play"){
+        runAnimation(delta);
 
     } else if(state.current_state=="create") {
         
