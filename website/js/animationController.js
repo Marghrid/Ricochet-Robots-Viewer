@@ -1,31 +1,8 @@
 class AnimationController {
-    constructor(move_set,interpolationType ="linear", timePropDistance = 1.0,base_time = 0.5){
-        this.times = [];
-        this.colors = [];
-        for(let i in move_set){
-            let t = Math.abs(move_set[i].delta.x)+Math.abs(move_set[i].delta.y);
-            t= (t*(timePropDistance) + 1.0*(1-timePropDistance))*base_time;
-            this.times.push(t);
-            switch(move_set[i].color){
-                case "R":
-                    this.colors.push("red");
-                    break;
-                case "G":
-                    this.colors.push("green");
-                    break;
-                case "B":
-                    this.colors.push("blue");
-                    break;
-                case "Y":
-                    this.colors.push("yellow");
-                    break;
-
-                default:
-                    console.log("Error: Unknown Color")
-                    break;
-            }
-        }
-        this.move_set = move_set;
+    constructor(solution,interpolationType ="linear"){
+        this.solution = solution;
+        console.log(this.solution);
+        this.solution.animationController = this;
         this.reset();
 
         switch(interpolationType){
@@ -72,47 +49,108 @@ class AnimationController {
         }
         
     }
-
-    step(delta){
-        //console.log("steping by ",delta);
-        //console.log("this.idx = ", this.idx," and this.time = ", this.time);
-        this.time +=delta;
-        while(this.time > this.times[this.idx]){
-            if(this.idx>=this.move_set.length-1){
-                this.time = this.times[this.idx];
+    seek(time){
+        //do binary search
+        /*if(time <= this.solution.times[0]){
+            this.time = this.solution.times[0];
+            this.idx = 0;
+            return;
+        }
+        if(time >= this.solution.times[this.solution.times.length-1]){
+            this.time = this.solution.times[this.solution.times.length-1];
+            this.idx = this.solution.times.length-2;
+            return;
+        }*/
+        
+        let tmp_idx = Math.floor((this.solution.times.length-1)/2);
+        this.time = time;
+        if(this.time<=this.solution.times[0]){
+            this.time =this.solution.times[0];
+            this.idx = 0;
+        } else if(this.time>=this.solution.times[this.solution.times.length-1]){
+            this.time =this.solution.times[this.solution.times.length-1];
+            this.idx = Math.max(this.solution.times.length-2,0);
+        } else while(true){
+            if(time<=this.solution.times[tmp_idx+1] && time>=this.solution.times[tmp_idx]){
                 break;
             }
-            scene.robots[this.colors[this.idx]].x = this.next_pos.x;
-            scene.robots[this.colors[this.idx]].y = this.next_pos.y;
-            
-            this.time -= this.times[this.idx];
+            if(time > this.solution.times[tmp_idx+1]){
+                tmp_idx = Math.floor((this.solution.times.length-1 + tmp_idx)/2);
+            } else /*time < this.solution.times[tmps_idx]*/{
+                tmp_idx = Math.floor(tmp_idx/2);                
+            }
+        }
+        this.step(0);
+    }
+
+    replaceData(solution){
+        /* Make sure time isn't overflowing */
+        this.solution = solution;
+        this.seek(this.time);
+        //TODO ???? maybe done?
+    }
+
+   
+
+    step(delta){
+        console.log(this.solution.times.length);
+
+        this.time +=delta;
+        while(this.time > this.solution.times[this.idx+1]){
             this.idx++;
-            this.prev_pos = makePos(scene.robots[this.colors[this.idx]].x,scene.robots[this.colors[this.idx]].y);
-            this.next_pos = makePos(scene.robots[this.colors[this.idx]].x + this.move_set[this.idx].delta.x,
-                         scene.robots[this.colors[this.idx]].y + this.move_set[this.idx].delta.y);
+            if(this.idx>this.solution.times.length-2){
+                this.idx = Math.max(0,this.solution.times.length-2);
+                this.time = this.solution.times[this.solution.times.length-1];
+            }
         
         }
-
-        let t = this.time/this.times[this.idx];
-        t = this.interpolationFn(t,this.time[this.idx],this.prev_pos,this.next_pos);
-        scene.robots[this.colors[this.idx]].x = this.prev_pos.x*(1-t) + this.next_pos.x*t;
-        scene.robots[this.colors[this.idx]].y = this.prev_pos.y*(1-t) + this.next_pos.y*t;
+        //else
+        while(this.time < this.solution.times[this.idx]){
+            this.idx--;
+            if(this.idx<0){
+                this.idx = 0;
+                this.time = this.solution.times[0];
+                break;
+            }
+        }
         
+        
+        for(let i in scene.robots){
+            let tmp =  makePos(this.solution.keyframes[this.idx][i].x,this.solution.keyframes[this.idx][i].y);
+            scene.robots[i].x = tmp.x;
+            scene.robots[i].y = tmp.y;
+        }
+
+        if(this.solution.moves.length>0){
+            //console.log("steping by ",delta);
+            //console.log("this.idx = ", this.idx," and this.time = ", this.time);
+            
+            
+            
+
+            let color = this.solution.moves[this.idx].color;
+            let prev_pos = this.solution.keyframes[this.idx][color];
+            let next_pos = this.solution.keyframes[this.idx+1][color];
+            let t = (this.time-this.solution.times[this.idx])/(this.solution.times[this.idx+1] -this.solution.times[this.idx]);
+            
+            t = this.interpolationFn(t,(this.solution.times[this.idx+1] -this.solution.times[this.idx]),prev_pos,next_pos);
+            
+            
+            let tmp = addPos(
+                        scalePos(prev_pos,1-t), 
+                        scalePos(next_pos,t));
+            scene.robots[color].x = tmp.x;
+            scene.robots[color].y = tmp.y;
+        }
     }
     
     reset(){
         for(let i in scene.robots){
-            scene.robots[i].x = scene.original_positions[i].x;
-            scene.robots[i].y = scene.original_positions[i].y;
+            scene.robots[i].x = this.solution.keyframes[0][i].x;
+            scene.robots[i].y = this.solution.keyframes[0][i].y;
         }
-        this.time = 0
+        this.time = this.solution.times[0];
         this.idx = 0;
-        this.prev_pos = makePos(scene.robots[this.colors[this.idx]].x,scene.robots[this.colors[this.idx]].y);
-        this.next_pos = makePos(scene.robots[this.colors[this.idx]].x + this.move_set[this.idx].delta.x,
-                         scene.robots[this.colors[this.idx]].y + this.move_set[this.idx].delta.y);
-
-        
-        console.log(scene.robots);
 
     }
 

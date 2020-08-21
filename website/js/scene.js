@@ -111,6 +111,24 @@ class Scene {
         }
         return barriers;
     }
+
+    //takes pos (vertical,horizontal), starting at 1
+    isBarrierRight(pos){;
+        pos = [Math.floor(pos.x)-1,Math.floor(pos.y)-1];
+        pos = this._convert_coordinates(pos);
+        return this.texture_data.data[
+                    this._get_texture_idx(pos[0],pos[1])] 
+                    >100;
+    }
+    //takes pos (vertical,horizontal), starting at 1
+    isBarrierDown(pos){
+        pos = [Math.floor(pos.x)-1,Math.floor(pos.y)-1];
+        pos = this._convert_coordinates(pos);
+        return this.texture_data.data[
+            this._get_texture_idx(Math.floor(pos[0]),
+                                  Math.floor(pos[1]))+1] 
+            >100;
+    }
     changeOriginalPositions(positions){
         this.original_positions.yellow.x = positions.yellow[0];
         this.original_positions.yellow.y = positions.yellow[1];
@@ -124,7 +142,91 @@ class Scene {
         this.original_positions.red.x = positions.red[0];
         this.original_positions.red.y = positions.red[1];  
     }
+    
+    isGoal(){
+        return (Math.floor(this.robots[this.goal_color_str].x)
+                    == Math.floor(this.goal.x) &&
+                    Math.floor(this.robots[this.goal_color_str].y)
+                        == Math.floor(this.goal.y));
+    }
 
+    compute_move(move, positions){
+        let current_pos = copyPos(positions[move.color]);
+        //delta  is (index, sign);
+        let delta = ["y",0];
+        switch(move.direction){
+            case "r":
+                delta = ["y",1];
+                break;
+            case "l":
+                delta = ["y",-1];
+                break;
+            case "u":
+                delta = ["x",-1];
+                break;
+            case "d":
+                delta = ["x",1];  
+                break;
+            default:  
+                error("Error in direction")        
+                break;
+        }
+        
+        while(true){
+            let new_pos = copyPos(current_pos);
+            new_pos[delta[0]] += delta[1];
+            
+            if(!noRobotAt(new_pos,positions)){
+                console.log("Hit robot!")
+                break;
+            }
+            if( new_pos.x<=0 && move.direction == "u" ||
+                new_pos.y<=0 && move.direction == "l" || 
+                new_pos.y>this.board_size && move.direction == "r" || 
+                new_pos.x > this.board_size && move.direction == "d"){
+                    console.log("Hit bounds!")
+                    break;
+            
+            }
+            if(delta[0] == "x"){
+                if(delta[1]>0){
+                    if(this.isBarrierDown(current_pos)){
+                        
+                        console.log("Hit v_barrier 1!")
+                        break;
+                    }
+                } else {
+                    if(this.isBarrierDown(makePos(current_pos.x-1,current_pos.y))){
+                        
+                        console.log("Hit v_barrier 2!")
+                        break;
+                    }
+                }
+            } else /*horizontal*/{
+                if(delta[1]>0){
+                    if(this.isBarrierRight(current_pos)){
+                        
+                        console.log("Hit h_barrier 1!")
+                        break;
+                    }
+                } else {
+                    if(this.isBarrierRight(makePos(current_pos.x,current_pos.y-1))){
+                        
+                        console.log("Hit h_barrier 2!")
+                        break;
+                    }
+                }
+            }
+            current_pos = copyPos(new_pos);
+        }
+        /*
+        console.log("Computed move: ",move)
+        console.log("started: ",positions[move[0]])
+        console.log("ended: ",current_pos)
+        */
+        return current_pos;
+    }
+    
     change_board(board_size, right_walls, bottom_walls,positions,goal,goal_color){
         this.board_size = board_size;
         this.center = [this.board_size/2,this.board_size/2];
@@ -141,6 +243,12 @@ class Scene {
 
         this._change_data_size(board_size);
         this._updateTexture(right_walls,bottom_walls,[],[]);
+        //everytime the board is changed, we reset animation
+        if(scene){
+            //TODO FIX SYNC
+            animationController.replaceData(new Solution());
+            animationController.reset();
+        }
     }
     toggle_goal_color(){
 

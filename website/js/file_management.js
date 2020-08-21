@@ -1,5 +1,4 @@
 var current_board = null;
-var current_sol = null;
 
 function read_instance_file(rr_file) {
   let rr_string;
@@ -27,8 +26,16 @@ function read_solution_file(rr_file) {
   reader.onload = function(e) {
         // cpf is a string with the file's contents
         sol_string = reader.result;
-        if(current_board!=null)
-            current_sol = parse_solution(sol_string);
+        if(current_board!=null){
+            let sol = parse_solution(sol_string);
+            
+            if(animationController == null){
+                animationController = new AnimationController(tmp2);
+            } else {
+                animationController.replaceData(sol);
+                animationController.reset();
+            }
+        }
         else
             error("No current board");
     }
@@ -37,86 +44,20 @@ function read_solution_file(rr_file) {
 
 function noRobotAt(position, positions){
     for(let i in positions){
-        if(positions[i][0] == position[0] && positions[i][1] == position[1]){
+        if(positions[i].x == position.x && positions[i].y == position.y){
             return false;
         }
     }
     return true;
 }
-function copyPos(pos){
-    return [pos[0],pos[1]];
-}
-function compute_move(move, positions){
-    
-    let current_pos = copyPos(positions[move[0]]);
-    //delta  is (index, sign);
-    let delta = [0,0];
-    switch(move[1]){
-        case "r":
-            delta = [1,1];
-            break;
-        case "l":
-            delta = [1,-1];
-            break;
-        case "u":
-            delta = [0,-1];
-            break;
-        case "d":
-            delta = [0,1];  
-            break;
-        default:  
-            error("Error in direction")        
-            break;
-    }
-    
-    while(true){
-        let new_pos = copyPos(current_pos);
-        console.log(new_pos,current_board.size);
-        new_pos[delta[0]] += delta[1];
-        if(!noRobotAt(new_pos,positions))
-            break;
-        if( new_pos[0]<=0 && move[1] == "u" ||
-            new_pos[1]<=0 && move[1] == "l" || 
-            new_pos[1]>current_board.size && move[1] == "r" || 
-            new_pos[0] > current_board.size && move[1] == "d")
-            break;
-        if(delta[0] == 0){
-            if(delta[1]>0){
-                if(current_board.barriers_down_dict[current_pos]){
-                    break;
-                }
-            } else {
-                if(current_board.barriers_down_dict[[current_pos[0]-1,current_pos[1]]]){
-                    break;
-                }
-            }
-        } else /*horizontal*/{
-            if(delta[1]>0){
-                if(current_board.barriers_right_dict[current_pos]){
-                    break;
-                }
-            } else {
-                if(current_board.barriers_right_dict[[current_pos[0],current_pos[1]-1]]){
-                    break;
-                }
-            }
-        }
-        current_pos = copyPos(new_pos);
-    }
-    /*
-    console.log("Computed move: ",move)
-    console.log("started: ",positions[move[0]])
-    console.log("ended: ",current_pos)
-    */
-    return current_pos;
-}
+
 
 function parse_solution(sol_string) {
 	const colors = ['R', 'G', 'B', 'Y']
     const directions = ['u', 'd', 'l', 'r']
 	let lines = sol_string.split('\n');
 	let sol_size = parseInt(lines[0]);
-	tmp = [];
+	let tmp = [];
 	for (let i = 1; i <= sol_size; ++i) {
 		line = lines[i].split(' ')
 		color = line[0]
@@ -126,23 +67,22 @@ function parse_solution(sol_string) {
 		tmp.push([color, direction]);
     }
     positions = {
-        R: current_board.robots["R"],
-        G: current_board.robots["G"],
-        Y: current_board.robots["Y"],
-        B: current_board.robots["B"],
+        red: [Math.floor(scene.original_positions.red.x)+1,
+                    Math.floor(scene.original_positions.red.y)+1],
+        G: [Math.floor(scene.original_positions.green.x)+1,
+                    Math.floor(scene.original_positions.green.y)+1],
+        Y: [Math.floor(scene.original_positions.yellow.x)+1,
+                    Math.floor(scene.original_positions.yellow.y)+1],
+        B: [Math.floor(scene.original_positions.blue.x)+1,
+                    Math.floor(scene.original_positions.blue.y)+1]
     }
-    tmp2 = [];
+    tmp2 = new Solution();
     for(let i in tmp){
-        let old = positions[tmp[i][0]]
-        positions[tmp[i][0]] = compute_move(tmp[i], positions);
-        tmp2.push({
-            color: tmp[i][0],
-            delta: makePos(positions[tmp[i][0]][0]-old[0], positions[tmp[i][0]][1]-old[1])
-        })
-
+        console.log(tmp[i])
+        console.log(COLOR_STL[tmp[i][0]],tmp[i][1]);
+        console.log(makeMovement(COLOR_STL[tmp[i][0]],tmp[i][1]));
+        tmp2.addMove(makeMovement(COLOR_STL[tmp[i][0]],tmp[i][1]));
     }
-
-    console.log("solution: ",tmp2);
 	return tmp2;
 }
 
