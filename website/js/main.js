@@ -42,6 +42,7 @@ class State{
         op.innerHTML = `
         <h4>load example</h4>
 			  <div id="example_buttons_div">
+                <button type="button" class="example_button" onclick="example0_button()"> grid 4x4 </button>
 				<button type="button" class="example_button" onclick="example1_button()"> grid 5x5 </button>
 				<button type="button" class="example_button" onclick="example2_button()"> grid 6x6 </button>
 				<button type="button" class="example_button" onclick="example3_button()"> grid 8x8 </button>
@@ -67,6 +68,7 @@ class State{
         <button type="button" class="example_button" onclick="noop()"> save solution </button>
         <h4>load example</h4>
         <div id="example_buttons_div">
+          <button type="button" class="example_button" onclick="example0_button()"> grid 4x4 </button>
           <button type="button" class="example_button" onclick="example1_button()"> grid 5x5 </button>
           <button type="button" class="example_button" onclick="example2_button()"> grid 6x6 </button>
           <button type="button" class="example_button" onclick="example3_button()"> grid 8x8 </button>

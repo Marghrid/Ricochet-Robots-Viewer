@@ -8,6 +8,10 @@ function refresh_button() {
         start_reading_sol(solution_file);*/
 }
 
+function example0_button() {
+    get_example_file("i0");
+}
+
 function example1_button() {
     get_example_file("i1");
 }
