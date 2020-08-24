@@ -56,6 +56,13 @@ class State{
 				<!--<button type="button" id="refresh_button" onclick="refresh_button()"> Refresh </button></p>-->
             </div>
         `
+        let hb = document.getElementById("help_buttons");
+        hb.innerHTML = `
+            <div class="example_button" onclick="toggle_anim_pause()" id="pause_button">pause</div>
+            <div class="example_button" onclick="reset_anim()">reset</div>
+        `
+
+
         this._activate("view");
     }
     
@@ -79,6 +86,14 @@ class State{
             <!--<button type="button" id="refresh_button" onclick="refresh_button()"> Refresh </button></p>-->
             </div>
         `;
+
+        let hb = document.getElementById("help_buttons");
+        hb.innerHTML = `
+        <div id="undo" class="example_button" onclick="undo_move()">undo</div>
+        <div id="reset" class="example_button" onclick="reset_moves()">reset</div>
+        `
+
+
         this._activate("play");
         
     }
@@ -99,12 +114,39 @@ class State{
         
         
         `
+
+        let hb = document.getElementById("help_buttons");
+        hb.innerHTML = ""
+
         let a = document.getElementById("board_size");
         a.value = scene.board_size;
 
         this._activate("create");
     }
 
+}
+
+function toggle_anim_pause(){
+    set_anim_pause(controls.playAnim);
+}
+
+function set_anim_pause(pause){
+    controls.playAnim = !pause;
+    let el = document.getElementById("pause_button");
+
+    el.innerHTML = controls.playAnim?"pause":"play";
+}
+
+function reset_anim(){
+    controls.resetAnim = true;
+}
+
+function undo_move(){
+    animationController.solution.removeMove();
+}
+
+function reset_moves(){
+    animationController.solution.reset();
 }
 
 function board_size_input(){
@@ -501,19 +543,8 @@ function setup(){
     hello_files = ["hi", "hello", "hey"]
     let hello_file = hello_files[Math.floor(Math.random() * hello_files.length)];
     get_example_file(hello_file);
-    // let right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
-    // let bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];
-    // let board_size = 8;
-    // let positions={
-    //     yellow: [0.5,0.5],
-    //     green:  [0.5,2.5],
-    //     blue:   [2.5,0.5],
-    //     red:    [2.5,2.5],
-    // }
-    // let goal = [1.5,1.5]
-    // let goal_color = "red"
 
-    scene = null; // new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
+    scene = null; 
     clock = new Clock();
     time = 0;
 
@@ -539,24 +570,6 @@ function doUIstuff(){
 }
 
 function runAnimation(delta){
-    /*if(controls.loadAnim){
-        if(current_sol != null && scene != null){
-            animationController = new AnimationController(current_sol, 
-                                                    animControlsParams.interpolationType,
-                                                    animControlsParams.timePropDistance,
-                                                    animControlsParams.base_time);
-            animationController.step(controls.animStartTime);
-            controls.loadAnim = false;
-        }
-    } else {
-        if(controls.resetAnim){
-            animationController.reset();
-            controls.resetAnim = false;
-        }
-    if(controls.playAnim){
-        animationController.step(delta);
-    }
-    }*/
     if(controls.resetAnim){
         
         animationController.reset();
@@ -567,55 +580,13 @@ function runAnimation(delta){
     }
     
 }
-/*
-function move(movement){
-    if(animationController.idx != animationController.moves.length ||
-        animationController.time<animationController.times[animationController.idx])
-        return;
-    else {
-        let m =scene.compute_move(movement)
-        playMoves.push(m);
-        animationController = new AnimationController(playMoves, 
-                            animControlsParams.interpolationType,
-                            animControlsParams.timePropDistance,
-                            animControlsParams.base_time);
-        let cumTime = 0;
-        for(let i = 0; i<animationController.times.length-1; i++){
-            cumTime += animationController.times[i];
-        }
-        animationController.step(cumTime);
-    
-    }
-}
-function undo(){
-    
-    if(animationController.idx != animationController.moves.length ||
-        animationController.time<animationController.times[animationController.idx])
-        return;
 
-    controls.rewind = false;
-    if(!playMoves.empty){
-        playMoves.pop();
-        animationController = new AnimationController(playMoves, 
-                                        animControlsParams.interpolationType,
-                                        animControlsParams.timePropDistance,
-                                        animControlsParams.base_time);
-                let cumTime = 0;
-                for(let i in animationController.times){
-                    cumTime += animationController.times[i];
-                }
-                animationController.step(cumTime);
-            }
-}
-*/
 
 function animate(){
     delta = clock.getDelta();
     doUIstuff();
    
     if(state.current_state=="view"){
-    //if(time>-1)
-    //    time += delta;
         runAnimation(delta);
         
     } else if(state.current_state=="play"){
@@ -625,24 +596,7 @@ function animate(){
         
     }
     
-    
-    /*if(time>6){
-        
-        let right_walls = [[1,4],[5,6],[2,5],[2,6],[3,5],[3,6]];
-        let bottom_walls = [[0,0],[6,0],[2,6],[2,7],[3,6],[3,7]];
-        let size = 12;
-        let positions={
-            yellow: [0.5,0.5],
-            green:  [0.5,2.5],
-            blue:   [2.5,0.5],
-            red:    [2.5,2.5],
-        }
-        let goal = [1.5,0.5];
-        let goal_color = "yellow";
-        
-        time=-10;
-        scene.change_board(size,right_walls,bottom_walls,positions,goal,goal_color)
-    }*/
+
     
     renderer.render();
     requestAnimationFrame(animate);

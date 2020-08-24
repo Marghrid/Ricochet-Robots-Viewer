@@ -9,7 +9,8 @@ body {
 	align-items: center;
 }
 #c {
-	flex-grow: 1;
+	height:100%;
+	width: 100%;
 	/*
 	image-rendering: optimizeSpeed;            
 	image-rendering: -moz-crisp-edges;          
@@ -19,6 +20,29 @@ body {
 	-ms-interpolation-mode: nearest-neighbor;   */
 }
 
+#canvas_container{
+	display: block;
+	flex-grow:1;
+	height: 100%;
+}
+#help_buttons {
+	display: inline-block;
+	text-align: center;
+	font-size: small;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin: auto;
+}
+
+#help_buttons div{
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	letter-spacing: 0.2em;
+	
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+}
 #nav_box {
 	width: 100%;
 	margin-bottom: 0.6em;

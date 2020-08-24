@@ -10,9 +10,7 @@ class Solution {
         this.base_time = base_time;
         this.timePropDistance = timePropDistance;
         this.animationController = null;
-        this._isWin = Math.floor(this.keyframes[0][scene.goal_color_str].x) == Math.floor(scene.goal.x) &&
-                    Math.floor(this.keyframes[0][scene.goal_color_str].y) == Math.floor(scene.goal.y);
-    }
+   }
 
     _copyKeyframe(keyframe){
         let kf = {};
@@ -29,10 +27,10 @@ class Solution {
             Math.floor(helping_positions[i].y) +1)
         }
         let tmp = scene.compute_move(move, helping_positions);
-        console.log("Computed move: ", move, helping_positions,tmp)
+       // console.log("Computed move: ", move, helping_positions,tmp)
         if(tmp.x == helping_positions[move.color].x &&
             tmp.y == helping_positions[move.color].y){
-            console.log("invalid move");
+            //console.log("invalid move");
             return;
         }
         
@@ -40,14 +38,6 @@ class Solution {
         
         this.keyframes.push(this._copyKeyframe(this.keyframes[this.keyframes.length-1]));
         this.keyframes[this.keyframes.length-1][move.color] = makePos(tmp.x-0.5,tmp.y-0.5);
-
-        if(scene.goal_color_str == move.color){
-            this._isWin =  Math.floor(this.keyframes[this.keyframes.length-1][move.color].x) == Math.floor(scene.goal.x) &&
-            Math.floor(this.keyframes[this.keyframes.length-1][move.color].y) == Math.floor(scene.goal.y);
-        }
-       
-
-
         
         let delta = subPos(tmp, helping_positions[move.color]);
         let t = Math.abs(delta.x)+Math.abs(delta.y);
@@ -58,13 +48,17 @@ class Solution {
         this.times.push(this.times[this.times.length-1]+t);
 
         if(this.animationController){
+            console.log("Added move!");
             this.animationController.replaceData(this);
-            this.animationController.reset();
+
         }
     }
 
     isWin(){
-        return this._isWin;
+        let idx = this.keyframes.length-1;
+        return Math.floor(this.keyframes[idx][scene.goal_color_str].x) == Math.floor(scene.goal.x) &&
+                Math.floor(this.keyframes[idx][scene.goal_color_str].y) == Math.floor(scene.goal.y);
+
     }
     removeMove(){
         if(this.moves.length<=0){
@@ -76,5 +70,17 @@ class Solution {
 
         if(this.animationController)
             this.animationController.replaceData(this);
+    }
+    reset(){
+        this.keyframes = [this._copyKeyframe(scene.original_positions)];
+        this.times = [0.0];
+        this.moves = [];
+
+        if(this.animationController){
+            this.animationController.replaceData(this);
+
+            //TODO: why is this here?
+            this.animationController.reset();
+        }
     }
 }

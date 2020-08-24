@@ -86,6 +86,8 @@ class AnimationController {
     replaceData(solution){
         /* Make sure time isn't overflowing */
         this.solution = solution;
+        this.solution.animationController = this;
+        console.log("seeking: ", this.time);
         this.seek(this.time);
         //TODO ???? maybe done?
     }
@@ -93,19 +95,27 @@ class AnimationController {
    
 
     step(delta){
-        console.log(this.solution.times.length);
-
-        this.time +=delta;
+       this.time +=delta;
+        
+        if(this.solution.times.length <2){
+            this.idx = 0;
+            this.time = this.solution.times[0];
+        }
+        //else
         while(this.time > this.solution.times[this.idx+1]){
             this.idx++;
-            if(this.idx>this.solution.times.length-2){
+            //console.log(this.idx);
+            if(this.idx>this.solution.times.length-2){;
+                
                 this.idx = Math.max(0,this.solution.times.length-2);
                 this.time = this.solution.times[this.solution.times.length-1];
+                break;
             }
         
         }
         //else
         while(this.time < this.solution.times[this.idx]){
+            console.log("hmmm?");
             this.idx--;
             if(this.idx<0){
                 this.idx = 0;
