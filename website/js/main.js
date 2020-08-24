@@ -36,6 +36,7 @@ class State{
     }
 
     activateView(){
+        
         let op = document.getElementById("options");
         op.innerHTML = `
         <h4>load example</h4>
@@ -56,13 +57,21 @@ class State{
 				<!--<button type="button" id="refresh_button" onclick="refresh_button()"> Refresh </button></p>-->
             </div>
         `
+
+        let inputElement = document.getElementById("rr_file");
+        inputElement.addEventListener("change", handleUploadInstanceFile, false);
+        inputElement = document.getElementById("sol_file");
+        inputElement.addEventListener("change", handleUploadSolutionFile, false);
+       
+
+
         let hb = document.getElementById("help_buttons");
         hb.innerHTML = `
             <div class="example_button" onclick="toggle_anim_pause()" id="pause_button">pause</div>
             <div class="example_button" onclick="reset_anim()">reset</div>
         `
 
-
+        set_anim_pause(true);
         this._activate("view");
     }
     
@@ -70,7 +79,7 @@ class State{
         
         let op = document.getElementById("options");
         op.innerHTML = `
-        <button type="button" class="example_button" onclick="noop()"> save solution </button>
+        <button type="button" class="example_button" onclick="saveSolution()"> save solution </button>
         <h4>load example</h4>
         <div id="example_buttons_div">
           <button type="button" class="example_button" onclick="example0_button()"> grid 4x4 </button>
@@ -87,6 +96,9 @@ class State{
             </div>
         `;
 
+        let inputElement = document.getElementById("rr_file");
+        inputElement.addEventListener("change", handleUploadInstanceFile, false);
+
         let hb = document.getElementById("help_buttons");
         hb.innerHTML = `
         <div id="undo" class="example_button" onclick="undo_move()">undo</div>
@@ -97,8 +109,7 @@ class State{
         this._activate("play");
         
     }
-    activateCreate(){
-        
+    activateCreate(){        
         let op = document.getElementById("options");
         op.innerHTML = `
         <button type="button" class="example_button" onclick="saveBoard()"> save instance </button>
@@ -125,6 +136,18 @@ class State{
     }
 
 }
+
+function handleUploadInstanceFile(){
+    const file = this.files[0];
+    read_instance_file(file);
+}
+
+
+function handleUploadSolutionFile(){
+    const file = this.files[0];
+    read_solution_file(file);
+}
+
 
 function toggle_anim_pause(){
     set_anim_pause(controls.playAnim);
@@ -315,6 +338,22 @@ function execute_move(robot,direction){
     console.log("moving",robot,"in direction",direction);
     animationController.solution.addMove(makeMovement(robot,direction));
     
+}
+
+function saveSolution(){
+    console.log("save solution");
+    if(animationController==null){
+        return;
+    }
+    var file = "";
+    file += animationController.solution.moves.length + "\n";
+    for(let i in animationController.solution.moves){
+        let move = animationController.solution.moves[i];
+        file += COLOR_LTS[move.color] + " " + move.direction + "\n";
+    }
+    var blob = new Blob([file], {type: "text/plain;charset=utf-8"});
+	saveAs(blob, "solution.txt");
+
 }
 function saveBoard(){
     console.log("save");
@@ -535,20 +574,29 @@ function setup(){
 
     //NOTE: This is necessary for init
     toggle_quality();
+
+    let board = new Board()
+    show(board);
+    animationController = new AnimationController(new Solution());
     
-    
+
     //console.log(canvas.height,canvas.width)
 
 
-    hello_files = ["hi", "hello", "hey"]
-    let hello_file = hello_files[Math.floor(Math.random() * hello_files.length)];
-    get_example_file(hello_file);
-
-    scene = null; 
+    
     clock = new Clock();
     time = 0;
 
     state=new State();
+    state.activateView();
+    set_anim_pause(true);
+    
+    hello_files = ["hi", "hello", "hey"]
+    let hello_file = hello_files[Math.floor(Math.random() * hello_files.length)];
+    get_example_file(hello_file);
+ 
+    
+    
     setupButtons()
 }
 
@@ -566,16 +614,25 @@ function setupButtons(){
 
 
 function doUIstuff(){
-
+    if(controls.loadScene){
+        loadInstance(controls.loadScene);
+        controls.loadScene = null;
+    }
+    if(controls.loadSolution){
+        if(state.current_state == "view")
+            loadSolution(controls.loadSolution);
+        
+        controls.loadSolution = null;
+        //TODO: check if solution is valid?
+    }
 }
 
 function runAnimation(delta){
-    if(controls.resetAnim){
-        
+    if(controls.resetAnim){        
         animationController.reset();
         controls.resetAnim = false;
     }
-    if(controls.playAnim){
+    if(controls.playAnim || state.current_state != "view"){
         animationController.step(delta);
     }
     

@@ -33,3 +33,10 @@ var COLOR_STL = {
     Y:"yellow",
     B: "blue"
 };
+
+var COLOR_LTS = {
+    red: "R",
+    blue: "B",
+    green: "G",
+    yellow: "Y"
+}

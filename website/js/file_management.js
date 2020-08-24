@@ -1,5 +1,3 @@
-var current_board = null;
-
 function read_instance_file(rr_file) {
   let rr_string;
   let rr_board;
@@ -7,16 +5,15 @@ function read_instance_file(rr_file) {
   reader.onload = function(e) {
         
         // cpf is a string with the file's contents
-        rr_string = reader.result;
-
-        //TODO this should not be here
-        current_sol = null;
-        controls.loadAnim = true;
-
-        current_board = parse_rr(rr_string);
-        show();
+        controls.loadScene = reader.result;        
     }
     reader.readAsText(rr_file);
+}
+
+function loadInstance(rr_string){
+    let board = parse_rr(rr_string);
+    show(board);
+
 }
 
 function read_solution_file(rr_file) {
@@ -24,22 +21,15 @@ function read_solution_file(rr_file) {
   let sol;
   let reader = new FileReader();
   reader.onload = function(e) {
-        // cpf is a string with the file's contents
-        sol_string = reader.result;
-        if(current_board!=null){
-            let sol = parse_solution(sol_string);
-            
-            if(animationController == null){
-                animationController = new AnimationController(tmp2);
-            } else {
-                animationController.replaceData(sol);
-                animationController.reset();
-            }
-        }
-        else
-            error("No current board");
+        controls.loadSolution = reader.result;        
     }
     reader.readAsText(rr_file);
+}
+
+function loadSolution(sol_string){
+    let sol = parse_solution(sol_string);    
+    animationController.replaceData(sol);
+    animationController.reset();
 }
 
 function noRobotAt(position, positions){
@@ -66,16 +56,7 @@ function parse_solution(sol_string) {
 		console.assert(directions.indexOf(direction) >= 0, direction + " not in " + directions)
 		tmp.push([color, direction]);
     }
-    positions = {
-        red: [Math.floor(scene.original_positions.red.x)+1,
-                    Math.floor(scene.original_positions.red.y)+1],
-        G: [Math.floor(scene.original_positions.green.x)+1,
-                    Math.floor(scene.original_positions.green.y)+1],
-        Y: [Math.floor(scene.original_positions.yellow.x)+1,
-                    Math.floor(scene.original_positions.yellow.y)+1],
-        B: [Math.floor(scene.original_positions.blue.x)+1,
-                    Math.floor(scene.original_positions.blue.y)+1]
-    }
+    
     tmp2 = new Solution();
     for(let i in tmp){
         console.log(tmp[i])

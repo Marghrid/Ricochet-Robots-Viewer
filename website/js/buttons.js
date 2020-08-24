@@ -28,35 +28,35 @@ function show_sol(solution) {
     solution.forEach(el => console.log(el))
 }
 
-function show() {
-	console.log(current_board.size);
-	console.log(current_board.robots);
-	console.log(current_board.goal_position);
-	console.log(current_board.barriers_right);
-    console.log(current_board.barriers_down);
+function show(board) {
+	console.log(board.size);
+	console.log(board.robots);
+	console.log(board.goal_position);
+	console.log(board.barriers_right);
+    console.log(board.barriers_down);
 
 
     
     let right_walls = [];
-    for(let barrier in current_board.barriers_right){
-        let pair = current_board.barriers_right[barrier];
+    for(let barrier in board.barriers_right){
+        let pair = board.barriers_right[barrier];
         right_walls.push([pair[0]-1,pair[1]-1]);
     }
     let bottom_walls = [];
-    for(let barrier in current_board.barriers_down){
-        let pair = current_board.barriers_down[barrier];
+    for(let barrier in board.barriers_down){
+        let pair = board.barriers_down[barrier];
         bottom_walls.push([pair[0]-1,pair[1]-1]);
     }
-    let board_size = current_board.size;
+    let board_size = board.size;
     let positions={
-        yellow: [current_board.robots["Y"][0]-0.5, current_board.robots["Y"][1]-0.5],
-        green:  [current_board.robots["G"][0]-0.5, current_board.robots["G"][1]-0.5],
-        blue:   [current_board.robots["B"][0]-0.5, current_board.robots["B"][1]-0.5],
-        red:    [current_board.robots["R"][0]-0.5, current_board.robots["R"][1]-0.5],
+        yellow: [board.robots["Y"][0]-0.5, board.robots["Y"][1]-0.5],
+        green:  [board.robots["G"][0]-0.5, board.robots["G"][1]-0.5],
+        blue:   [board.robots["B"][0]-0.5, board.robots["B"][1]-0.5],
+        red:    [board.robots["R"][0]-0.5, board.robots["R"][1]-0.5],
     }
-    let goal = [current_board.goal_position[1]-0.5,current_board.goal_position[2]-0.5]
+    let goal = [board.goal_position[1]-0.5,board.goal_position[2]-0.5]
     let goal_color = "red"
-    switch (current_board.goal_position[0]) {
+    switch (board.goal_position[0]) {
         case "R":
             goal_color = "red";
             break;
@@ -72,9 +72,11 @@ function show() {
             break;
         
     }
-    if (scene == null) {
-        scene = new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
+    if(scene!=null){
+        scene.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color);   
     } else {
-        scene.change_board(board_size,right_walls,bottom_walls,positions,goal,goal_color)
+        scene = new Scene(board_size,right_walls,bottom_walls,positions, goal, goal_color);
     }
+    if(animationController)
+        animationController.replaceData(new Solution());
 }
