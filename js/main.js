@@ -121,7 +121,7 @@ class State{
        
         <h4>how to</h4>
         <p>drag a robot/goal to move it.<p>
-        <p>press LMB over a wall to activate/deactivate it.<p>
+        <p>click over a wall to place/remove a barrier.<p>
         
         
         `
